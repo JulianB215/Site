@@ -300,48 +300,57 @@ const CLUES = [
 {
     id:1, label:'Thomin', type:'word',
     text:"τ 'principale (en)'",
-    word:"THOMIN", n:6
+    word:"THOMIN", n:6,
+    hint:'Professeur + principale(en) = main '
   },  {
     id:2, label:'Jul', type:'word',
-    word:"JUL", n:3
+    word:"JUL", n:3,
+    hint:'Musique'
   },
   {
     id:3, label:'Rugby', type:'image',
     img:"r.jpg",
-    word:"RUGBY", n:5
+    word:"RUGBY", n:5,
+    hint:'Sport'
   },
   {
     id:4, label:'Brésil', type:'image',
     img:"br.jpg",
-    word:"BRESIL", n:6
+    word:"BRESIL", n:6,
+    hint:'Stage'
   },
   {
     id:5, label:'Japon', type:'word',
     text:"あなてちど",
-    word:"JAPON", n:5
+    word:"JAPON", n:5,
+    hint:'Pays'
   },
   {
     id:6, label:'Occitanie', type:'image',
     // ↓↓ REMPLACE par une photo de l'Occitanie ↓↓
     img:"o.jpg",
-    word:"OCCITANIE", n:9
+    word:"OCCITANIE", n:9,
+    hint:'Région'
   },
   {
     id:7, label:'Anagramme', type:'word',
     text:"L’injure libérale",
-    word:"BREUILLERJULIAN", n:15
+    word:"BREUILLERJULIAN", n:15,
+    hint:'Anagramme'
   },
   {
     id:8, label:'Cheer', type:'image',
     // ↓↓ REMPLACE par une photo de cheer ↓↓
     img:"C.png",
-    word:"CHEER", n:5
+    word:"CHEER", n:5,
+    hint:'Qui connais-tu comme colombien autour de toi ?'
   },
   {
     id:9, label:'Pirates', type:'image',
     // ↓↓ REMPLACE par une photo de pirates ↓↓
     img:"perle.jpg",
-    word:"PIRATES", n:7
+    word:"PIRATES", n:7,
+    hint:'Perle noire'
   },
 ];
 
@@ -619,6 +628,7 @@ function defaultStoreState(){
     ansAt:{},
     att:{},
     val:{},
+    hintShown:{},
     bg:null,
     timerEnabled:true,
     who:{tries:[],found:false},
@@ -703,6 +713,7 @@ function normalizeState(raw){
   d.ansAt=d.ansAt&&typeof d.ansAt==='object'?d.ansAt:{};
   d.att=d.att&&typeof d.att==='object'?d.att:{};
   d.val=d.val&&typeof d.val==='object'?d.val:{};
+  d.hintShown=d.hintShown&&typeof d.hintShown==='object'?d.hintShown:{};
   d.bg=typeof d.bg==='string'?d.bg:null;
   d.timerEnabled=d.timerEnabled!==false;
   d.who=d.who&&typeof d.who==='object'?d.who:{tries:[],found:false};
@@ -742,6 +753,7 @@ function hasMeaningfulState(d){
   if(Object.keys(d.ans||{}).length) return true;
   if(Object.keys(d.ansAt||{}).length) return true;
   if(Object.keys(d.val||{}).length) return true;
+  if(Object.keys(d.hintShown||{}).length) return true;
   if(Object.keys(d.att||{}).length) return true;
   if(d.bg) return true;
   if(d.timerEnabled===false) return true;
@@ -837,6 +849,7 @@ const S = {
   },
   addAtt(cid,w){const d=this.load();d.att[cid]=d.att[cid]||[];d.att[cid].push({w,date:new Date().toISOString()});this.save(d)},
   valid(cid){const d=this.load();d.val[cid]=true;this.save(d)},
+  setHintShown(cid,shown){const d=this.load();d.hintShown[cid]=!!shown;this.save(d)},
   setBg(hex){const d=this.load();d.bg=hex;this.save(d)},
   setTimerEnabled(enabled){const d=this.load();d.timerEnabled=!!enabled;this.save(d)},
   addWhoTry(v){const d=this.load();d.who=d.who||{tries:[],found:false};d.who.tries.push(v);this.save(d)},
@@ -1309,6 +1322,11 @@ function renderIndices(){
     const unlocked=q&&d.ans[q.id]!==undefined;
     const isVal=!!d.val[clue.id];
     const tries=d.att[clue.id]||[];
+    const hintText=(clue.hint||'').trim();
+    const hintVisible=!!(d.hintShown&&d.hintShown[clue.id]);
+    const hintHtml=(hintVisible&&hintText)
+      ?`<div class="card-rose" style="padding:12px 14px;margin-bottom:12px"><div class="label-sm" style="margin-bottom:6px;color:var(--rose)">Hint</div><p style="font-size:13px;color:var(--ink);line-height:1.7">${hintText}</p></div>`
+      :'';
 
     const div=document.createElement('div');
     div.style.cssText=`animation:fadeUp .4s cubic-bezier(.16,1,.3,1) ${i*.07}s both;margin-bottom:24px`;
@@ -1341,6 +1359,7 @@ function renderIndices(){
             <span style="font-size:12px;color:var(--dash)">Image à venir…</span>
           </div>
         </div>
+        ${hintHtml}
         <div class="dash-row mb12" id="dashes-${clue.id}"></div>
         ${!isVal?`<div class="flex g10" id="izone-${clue.id}">
           <input class="inp" id="ci-${clue.id}" placeholder="Quel mot cette image te inspire ?"
@@ -1359,6 +1378,7 @@ function renderIndices(){
           ${isVal?'<span class="tag tag-green">✓ Trouvé !</span>':'<span class="tag tag-rose">À deviner</span>'}
         </div>
         ${clueTextHtml(clue,'20px','line-height:1.6;margin-bottom:20px')}
+        ${hintHtml}
         <div class="dash-row mb16" id="dashes-${clue.id}"></div>
         ${!isVal?`<div class="flex g10" id="izone-${clue.id}">
           <input class="inp" id="ci-${clue.id}" placeholder="Ton mot…"
@@ -1501,6 +1521,12 @@ function adminToggleTimer(enabled){
   if(role==='admin') renderAdminHome();
 }
 
+function adminToggleHint(cid,shown){
+  if(role!=='admin') return;
+  S.setHintShown(cid,shown);
+  renderAdminClues();
+}
+
 function renderAdminHome(){
   const d=S.load();
   const ans=answeredCount(d);
@@ -1561,6 +1587,9 @@ function renderAdminClues(){
   document.getElementById('aclues').innerHTML=CLUES.map(clue=>{
     const q=qByCid[clue.id];const unlocked=q&&d.ans[q.id]!==undefined;
     const isVal=!!d.val[clue.id];const tries=d.att[clue.id]||[];
+    const hintText=(clue.hint||'').trim();
+    const canShowHint=hintText.length>0;
+    const hintVisible=!!(d.hintShown&&d.hintShown[clue.id]);
     const typeLabel=clue.type==='image'?'🖼 image + mot':'🔤 mot';
     return`<div class="card mb20" style="border-color:${isVal?'rgba(35,107,62,.2)':'var(--border)'};background:${isVal?'#f0f9f4':'white'}">
       <div class="flex fb fc mb12">
@@ -1572,10 +1601,12 @@ function renderAdminClues(){
           ${!unlocked?'<span class="tag tag-gray">Verrouillé</span>':''}
           ${unlocked&&!isVal?'<span class="tag tag-rose">En cours</span>':''}
           ${isVal?'<span class="tag tag-green">✓ Trouvé !</span>':''}
+          ${canShowHint?`<span class="tag ${hintVisible?'tag-green':'tag-gray'}">Hint ${hintVisible?'visible':'masque'}</span>`:'<span class="tag tag-gray">Hint vide</span>'}
         </div>
       </div>
       ${clue.type==='image'&&unlocked?`<img src="${clue.img}" style="width:100%;max-height:100px;object-fit:contain;border-radius:3px;margin-bottom:12px;background:var(--warm)" alt="${clue.label}"/>`:''}
       ${(clue.text||'').trim()?`<p class="hint mb12">« ${clue.text.trim()} »</p>`:''}
+      ${canShowHint?`<div class="mb12"><button class="btn btn-ghost btn-sm" onclick="adminToggleHint(${clue.id}, ${hintVisible?'false':'true'})">${hintVisible?'Masquer le hint':'Montrer le hint'}</button></div>`:''}
       ${tries.length?`<div class="label-sm" style="margin-bottom:8px">Tentatives (${tries.length})</div><div class="flex g8 fwrap">${tries.map(t=>`<span class="tag" style="background:${t.w===clue.word?'#e6f5ec':'var(--warm)'};color:${t.w===clue.word?'#236b3e':'var(--muted)'};letter-spacing:.1em">${t.w}${t.w===clue.word?' ✓':''}</span>`).join('')}</div>`:`<p class="hint">${unlocked?'Aucune tentative encore…':'Indice pas encore débloqué.'}</p>`}
     </div>`;
   }).join('');
