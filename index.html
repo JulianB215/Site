@@ -1054,7 +1054,7 @@ function goPage(id){
 // ══════════════════════════════════════════════════════════════
 function renderHome(){
   const d=S.load();
-  const ans=displayMinusOneIfPositive(answeredCount(d));
+  const ans=answeredCount(d);
   const wordVal=CLUES.filter(c=>d.val[c.id]).length;
   const pct=Math.round(ans/QS.length*100);
 
@@ -1499,7 +1499,7 @@ function adminToggleTimer(enabled){
 
 function renderAdminHome(){
   const d=S.load();
-  const ans=displayMinusOneIfPositive(answeredCount(d));
+  const ans=answeredCount(d);
   const wordVal=CLUES.filter(c=>d.val[c.id]).length;
   const att=displayMinusOneIfPositive(totalAttemptsCount(d));
   const timerEnabled=d.timerEnabled!==false;
