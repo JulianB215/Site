@@ -1011,6 +1011,9 @@ function answeredCount(d){
 function totalAttemptsCount(d){
   return CLUES.reduce((n,c)=>n+((Array.isArray(d.att[c.id])?d.att[c.id].length:0)),0);
 }
+function displayMinusOneIfPositive(v){
+  return v>0?v-1:0;
+}
 function unlockedCount(){const d=S.load();return answeredCount(d)}
 function navActive(id){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
@@ -1037,7 +1040,7 @@ function goPage(id){
 // ══════════════════════════════════════════════════════════════
 function renderHome(){
   const d=S.load();
-  const ans=answeredCount(d);
+  const ans=displayMinusOneIfPositive(answeredCount(d));
   const wordVal=CLUES.filter(c=>d.val[c.id]).length;
   const pct=Math.round(ans/QS.length*100);
 
@@ -1482,9 +1485,9 @@ function adminToggleTimer(enabled){
 
 function renderAdminHome(){
   const d=S.load();
-  const ans=answeredCount(d);
+  const ans=displayMinusOneIfPositive(answeredCount(d));
   const wordVal=CLUES.filter(c=>d.val[c.id]).length;
-  const att=totalAttemptsCount(d);
+  const att=displayMinusOneIfPositive(totalAttemptsCount(d));
   const timerEnabled=d.timerEnabled!==false;
   document.getElementById('astats').innerHTML=[
     {n:ans,t:QS.length,l:'Questions répondues'},
