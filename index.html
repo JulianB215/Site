@@ -420,6 +420,11 @@ const SPOTIFY_IDS = {
   'eminem':        '7dGJo4pcD2V6oG8kP0tJRR',
 };
 
+// IDs verifies manuellement. Le reste passe en embed de recherche pour eviter les mauvais artistes.
+const VERIFIED_SPOTIFY_IDS = {
+  'jul': '3IW7ScrzXmPvZhB27hmfgy',
+};
+
 const SERIES_OPENINGS = [
   {keywords:['arcane','league of legends','lol','jinx','vi'],label:'Arcane',youtubeId:'fXmAurh012s'},
   {keywords:['game of thrones','got','westeros','stark','targaryen'],label:'Game of Thrones',youtubeId:'s7L2PVdrb_8'},
@@ -862,22 +867,26 @@ initRemoteSync();
 // ══════════════════════════════════════════════════════════════
 function getSpotifyId(artistName){
   const key=artistName.trim().toLowerCase();
-  // Direct match
-  if(SPOTIFY_IDS[key]) return SPOTIFY_IDS[key];
+  // Direct match (uniquement IDs verifies)
+  if(VERIFIED_SPOTIFY_IDS[key]) return VERIFIED_SPOTIFY_IDS[key];
   // Partial match
-  for(const k of Object.keys(SPOTIFY_IDS)){
-    if(key.includes(k)||k.includes(key)) return SPOTIFY_IDS[k];
+  for(const k of Object.keys(VERIFIED_SPOTIFY_IDS)){
+    if(key.includes(k)||k.includes(key)) return VERIFIED_SPOTIFY_IDS[k];
   }
   return null;
 }
 
 function buildSpotifyEmbed(artistName, compact=false){
-  const id=getSpotifyId(artistName);
-  if(!id) return null;
+  const clean=(artistName||'').toString().trim();
+  if(!clean) return null;
+  const id=getSpotifyId(clean);
   // compact = petit player pour page indices, sinon grand player accueil
   const h=compact?80:152;
+  const src=id
+    ?`https://open.spotify.com/embed/artist/${id}`
+    :`https://open.spotify.com/embed/search/${encodeURIComponent(clean)}`;
   return `<iframe
-    src="https://open.spotify.com/embed/artist/${id}"
+    src="${src}"
     width="100%" height="${h}" frameborder="0"
     allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
     loading="eager" style="border-radius:${compact?8:12}px"></iframe>`;
@@ -895,7 +904,7 @@ function injectSpotify(artistName){
         <p class="spotify-hint">Clique sur une musique pour l'écouter</p>
       </div>`;
     } else {
-      // Rappeur non trouvé dans la liste → lien Spotify search
+      // Fallback ultime: lien Spotify search
       const q=encodeURIComponent(artistName);
       zone.innerHTML=`<div class="no-music-hint mb32">
         ♫ <strong>${artistName}</strong> — 
