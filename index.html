@@ -59,6 +59,8 @@ h2.big{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:300;lin
 /* SPOTIFY PLAYER */
 #spotify-wrap{margin-bottom:32px;animation:fadeUp .6s cubic-bezier(.16,1,.3,1) both}
 #spotify-wrap iframe{border-radius:12px;border:none}
+.spotify-frame-wrap{position:relative;border-radius:12px;overflow:hidden}
+.spotify-frame-overlay{position:absolute;right:10px;bottom:10px;background:rgba(0,0,0,.72);color:#fff;padding:6px 10px;border-radius:999px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;pointer-events:none}
 .spotify-hint{font-size:11px;color:var(--muted);text-align:center;margin-top:8px;letter-spacing:.06em}
 .no-music-hint{background:var(--warm);border-radius:3px;padding:16px 20px;font-size:13px;color:var(--muted);font-style:italic;text-align:center;margin-bottom:32px}
 
@@ -291,8 +293,7 @@ window.EMAIL_NOTIF_CONFIG = {
   templateId: 'template_ls43yk9'
 };
 
-// Optionnel: renseigne ces valeurs pour reproduire le flux client_credentials
-// du script Python (attention: exposer le secret dans le front est risqué).
+// Optionnel: ne pas exposer ces valeurs en production publique.
 window.SPOTIFY_CLIENT_ID = '2817397c3a8f4618ae3dfc4f0bdab442';
 window.SPOTIFY_CLIENT_SECRET = '5d54067ae33244e4bcaa7baf3d5e4144';
 
@@ -931,7 +932,18 @@ let SPOTIFY_TOKEN_CACHE={token:null,expiresAt:0};
 function getCachedSpotifyId(artistName){
   const key=normalizeArtistKey(artistName);
   if(!key) return null;
-  return SPOTIFY_ID_CACHE[key]||null;
+  if(SPOTIFY_ID_CACHE[key]) return SPOTIFY_ID_CACHE[key];
+
+  // Fallback immédiat sur la liste locale existante.
+  if(VERIFIED_SPOTIFY_IDS&&typeof VERIFIED_SPOTIFY_IDS==='object'){
+    if(VERIFIED_SPOTIFY_IDS[key]) return VERIFIED_SPOTIFY_IDS[key];
+    for(const [name,id] of Object.entries(VERIFIED_SPOTIFY_IDS)){
+      const nk=normalizeArtistKey(name);
+      if(!nk) continue;
+      if(key===nk||key.includes(nk)||nk.includes(key)) return id;
+    }
+  }
+  return null;
 }
 
 function setCachedSpotifyId(artistName,id){
@@ -1016,7 +1028,7 @@ async function getSpotifyAccessToken(){
   }
 }
 
-async function upgradeSpotifyEmbedFromProxy(artistName,iframeEl,compact=false){
+async function upgradeSpotifyEmbed(artistName,iframeEl,compact=false){
   if(!iframeEl) return;
   const id=await fetchSpotifyArtistId(artistName);
   if(!id) return;
@@ -1036,11 +1048,14 @@ function buildSpotifyEmbed(artistName, compact=false){
   const src=id
     ?`https://open.spotify.com/embed/artist/${id}`
     :`https://open.spotify.com/embed/search/${encodeURIComponent(clean)}`;
-  return `<iframe
-    src="${src}"
-    width="100%" height="${h}" frameborder="0"
-    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-    loading="eager" style="border-radius:${compact?8:12}px"></iframe>`;
+  return `<div class="spotify-frame-wrap">
+    <iframe
+      src="${src}"
+      width="100%" height="${h}" frameborder="0"
+      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+      loading="eager" style="border-radius:${compact?8:12}px"></iframe>
+    <span class="spotify-frame-overlay">Spotify</span>
+  </div>`;
 }
 
 function injectSpotify(artistName){
@@ -1055,7 +1070,7 @@ function injectSpotify(artistName){
         <p class="spotify-hint">Clique sur une musique pour l'écouter</p>
       </div>`;
       const iframe=zone.querySelector('iframe');
-      upgradeSpotifyEmbedFromProxy(artistName,iframe,false);
+      upgradeSpotifyEmbed(artistName,iframe,false);
     } else {
       // Fallback ultime: lien Spotify search
       const q=encodeURIComponent(artistName);
@@ -1073,7 +1088,7 @@ function injectSpotify(artistName){
     if(embed){
       zone2.innerHTML=`<div style="opacity:.85">${embed}</div>`;
       const iframe=zone2.querySelector('iframe');
-      upgradeSpotifyEmbedFromProxy(artistName,iframe,true);
+      upgradeSpotifyEmbed(artistName,iframe,true);
     }
   }
 }
@@ -1354,7 +1369,7 @@ function buildForm(el,q){
           spPrev.style.display='block';
           spPrev.innerHTML=`<div class="label-sm" style="margin-bottom:10px;color:var(--rose)">Aperçu — c'est lui ?</div>${embed}`;
           const iframe=spPrev.querySelector('iframe');
-          upgradeSpotifyEmbedFromProxy(v,iframe,false);
+          upgradeSpotifyEmbed(v,iframe,false);
         } else {
           spPrev.style.display='block';
           spPrev.innerHTML=`<div class="card-rose" style="font-size:13px;color:var(--muted)">
