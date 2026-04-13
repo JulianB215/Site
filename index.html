@@ -261,15 +261,7 @@ textarea.inp{resize:vertical;font-family:'Cormorant Garamond',serif;font-size:17
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
 <script>
-// ══════════════════════════════════════════════════════════════
-// DATA
-// ══════════════════════════════════════════════════════════════
-// Configure this object in production to enable multi-device sync.
-// Example:
-// window.SITE_SYNC_CONFIG = {
-//   firebaseConfig: { apiKey:'...', authDomain:'...', databaseURL:'...', projectId:'...', appId:'...' },
-//   dbPath: 'pour-anna/prod'
-// };
+
 window.SITE_SYNC_CONFIG = {
   firebaseConfig: {
     apiKey: "AIzaSyDd9wI2bO0DkDhcC9jYekk-lAoltjNiwiI",
@@ -692,6 +684,7 @@ const SYNC={
   enabled:false,
   dbRef:null,
   booted:false,
+  ready:false,
   pushTimer:null,
   applyingRemote:false,
   pendingRender:false,
@@ -736,8 +729,20 @@ function rerenderActivePage(){
   if(id) goPage(id);
 }
 
+function hasMeaningfulState(d){
+  if(!d||typeof d!=='object') return false;
+  if(Object.keys(d.ans||{}).length) return true;
+  if(Object.keys(d.ansAt||{}).length) return true;
+  if(Object.keys(d.val||{}).length) return true;
+  if(Object.keys(d.att||{}).length) return true;
+  if(d.bg) return true;
+  if(d.timerEnabled===false) return true;
+  if(d.who&&((d.who.found===true)||(Array.isArray(d.who.tries)&&d.who.tries.length))) return true;
+  return false;
+}
+
 function scheduleRemotePush(data){
-  if(!SYNC.enabled||!SYNC.dbRef||SYNC.applyingRemote) return;
+  if(!SYNC.enabled||!SYNC.dbRef||!SYNC.ready||SYNC.applyingRemote) return;
   clearTimeout(SYNC.pushTimer);
   SYNC.pushTimer=setTimeout(()=>{
     SYNC.dbRef.set(data).catch(()=>{});
@@ -754,22 +759,42 @@ function initRemoteSync(){
     const app=firebase.apps&&firebase.apps.length?firebase.app():firebase.initializeApp(cfg.firebaseConfig);
     SYNC.dbRef=app.database().ref(cfg.dbPath);
     SYNC.enabled=true;
-    SYNC.dbRef.on('value',snap=>{
+
+    // Bootstrap once: prefer remote state when it exists, otherwise seed remote from local.
+    SYNC.dbRef.once('value').then(snap=>{
       const remote=normalizeState(snap.val());
       const local=S.load();
-      const remoteTs=remote.meta&&remote.meta.updatedAt?remote.meta.updatedAt:0;
-      const localTs=local.meta&&local.meta.updatedAt?local.meta.updatedAt:0;
-      if(remoteTs===0) return;
-      if(remoteTs<=localTs&&remote.meta.lastWriter===local.meta.lastWriter) return;
-      SYNC.applyingRemote=true;
-      try{localStorage.setItem('pt5',JSON.stringify(remote));}catch{}
-      SYNC.applyingRemote=false;
-      rerenderActivePage();
+      const remoteHasData=hasMeaningfulState(remote);
+      const localHasData=hasMeaningfulState(local);
+
+      if(remoteHasData){
+        SYNC.applyingRemote=true;
+        try{localStorage.setItem('pt5',JSON.stringify(remote));}catch{}
+        SYNC.applyingRemote=false;
+        rerenderActivePage();
+      } else if(localHasData){
+        scheduleRemotePush(local);
+      }
+
+      SYNC.ready=true;
+
+      SYNC.dbRef.on('value',snap2=>{
+        const incoming=normalizeState(snap2.val());
+        const localNow=S.load();
+        const remoteTs=incoming.meta&&incoming.meta.updatedAt?incoming.meta.updatedAt:0;
+        const localTs=localNow.meta&&localNow.meta.updatedAt?localNow.meta.updatedAt:0;
+        if(!hasMeaningfulState(incoming)) return;
+        // Ignore stale or equal updates to prevent count drift across devices.
+        if(remoteTs&&localTs&&remoteTs<=localTs) return;
+
+        SYNC.applyingRemote=true;
+        try{localStorage.setItem('pt5',JSON.stringify(incoming));}catch{}
+        SYNC.applyingRemote=false;
+        rerenderActivePage();
+      });
+    }).catch(()=>{
+      SYNC.ready=true;
     });
-    const seeded=S.load();
-    if((seeded.meta&&seeded.meta.updatedAt)||Object.keys(seeded.ans||{}).length){
-      scheduleRemotePush(seeded);
-    }
   }catch{
     SYNC.enabled=false;
     SYNC.dbRef=null;
