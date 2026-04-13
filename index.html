@@ -648,17 +648,19 @@ const S = {
   load(){
     try{const d=JSON.parse(localStorage.getItem('pt5')||'{}');
       d.ans=d.ans||{};d.ansAt=d.ansAt||{};d.att=d.att||{};d.val=d.val||{};d.bg=d.bg||null;
+      d.timerEnabled=d.timerEnabled!==false;
       d.who=d.who||{tries:[],found:false};
       d.who.tries=Array.isArray(d.who.tries)?d.who.tries:[];
       d.who.found=!!d.who.found;
       return d}
-    catch{return{ans:{},ansAt:{},att:{},val:{},bg:null,who:{tries:[],found:false}}}
+    catch{return{ans:{},ansAt:{},att:{},val:{},bg:null,timerEnabled:true,who:{tries:[],found:false}}}
   },
   save(d){try{localStorage.setItem('pt5',JSON.stringify(d))}catch{}},
   saveAns(id,v){const d=this.load();d.ans[id]=v;d.ansAt[id]=new Date().toISOString();this.save(d)},
   addAtt(cid,w){const d=this.load();d.att[cid]=d.att[cid]||[];d.att[cid].push({w,date:new Date().toISOString()});this.save(d)},
   valid(cid){const d=this.load();d.val[cid]=true;this.save(d)},
   setBg(hex){const d=this.load();d.bg=hex;this.save(d)},
+  setTimerEnabled(enabled){const d=this.load();d.timerEnabled=!!enabled;this.save(d)},
   addWhoTry(v){const d=this.load();d.who=d.who||{tries:[],found:false};d.who.tries.push(v);this.save(d)},
   setWhoFound(){const d=this.load();d.who=d.who||{tries:[],found:false};d.who.found=true;this.save(d)},
 };
@@ -672,6 +674,7 @@ function formatRemaining(ms){
 }
 
 function getQuestionUnlockInfo(index,d){
+  if(!d.timerEnabled) return {unlocked:true,remaining:0,waitingPrevious:false};
   if(index===0) return {unlocked:true,remaining:0,waitingPrevious:false};
   const prev=QS[index-1];
   if(d.ans[prev.id]===undefined) return {unlocked:false,remaining:QUESTION_DELAY_MS,waitingPrevious:true};
@@ -900,7 +903,7 @@ function renderQuestions(){
   const dotsEl=document.getElementById('qdots');dotsEl.innerHTML='';
   QS.forEach((q,i)=>{
     const b=document.createElement('button');
-    const isLocked=d.ans[q.id]===undefined&&!unlockByIdx[i].unlocked;
+    const isLocked=d.timerEnabled&&d.ans[q.id]===undefined&&!unlockByIdx[i].unlocked;
     b.className='dot '+(i===curQ?'active':d.ans[q.id]!==undefined?'done':'idle');
     b.disabled=isLocked;
     b.style.opacity=isLocked?.35:1;
@@ -935,7 +938,7 @@ function renderQuestions(){
     el.insertAdjacentHTML('beforeend',`
       <div class="card-rose mb20"><div class="label-sm" style="margin-bottom:10px;color:var(--rose)">Ta réponse</div>${prev}</div>
       <p style="font-size:12px;color:var(--muted);margin-bottom:24px;display:flex;align-items:center;gap:6px"><span style="color:var(--rose)">✓</span> Indice #${q.cid} débloqué !</p>`);
-  } else if(!curUnlock.unlocked) {
+  } else if(d.timerEnabled&&!curUnlock.unlocked) {
     const detail=curUnlock.waitingPrevious
       ?'Tu dois d\'abord répondre à la question précédente.'
       :`Cette question se débloque ${formatRemaining(curUnlock.remaining)} après ta dernière réponse.`;
@@ -1299,18 +1302,30 @@ function adminResetSite(){
   alert('Memoire utilisateur effacee.');
 }
 
+function adminToggleTimer(enabled){
+  S.setTimerEnabled(enabled);
+  if(role==='admin') renderAdminHome();
+}
+
 function renderAdminHome(){
   const d=S.load();
   const ans=Object.keys(d.ans).length;
   const wordVal=CLUES.filter(c=>d.val[c.id]).length;
   const att=Object.values(d.att).flat().length;
+  const timerEnabled=d.timerEnabled!==false;
   document.getElementById('astats').innerHTML=[
     {n:ans,t:QS.length,l:'Questions répondues'},
     {n:wordVal,t:CLUES.length,l:'Mots trouvés'},
     {n:att,t:null,l:'Tentatives au total'},
   ].map(s=>`<div class="stat-card"><div class="stat-n">${s.n}${s.t?`<sub>/${s.t}`:''}</sub></div><div class="stat-label">${s.l}</div></div>`).join('');
   document.getElementById('aqlist').innerHTML=
-    `<div class="label-sm" style="margin-bottom:16px">État des questions</div>`+
+    `<div class="flex fb fc mb16">
+      <div class="label-sm" style="margin:0">État des questions</div>
+      <label class="flex fc g8" style="font-size:12px;color:var(--muted);cursor:pointer">
+        <input id="timer-toggle" type="checkbox" ${timerEnabled?'checked':''} onchange="adminToggleTimer(this.checked)"/>
+        Timer 1h activé
+      </label>
+    </div>`+
     QS.map(q=>{const a=d.ans[q.id]!==undefined;return`<div class="flex fb fc" style="padding:13px 0;border-bottom:1px solid var(--border)"><div class="flex fc g12"><div style="width:6px;height:6px;border-radius:50%;background:${a?'var(--rose)':'var(--border)'};flex-shrink:0"></div><p style="font-size:13px;color:var(--ink)">${q.text}</p></div>${a?'<span class="tag tag-green">Répondue</span>':'<span class="tag tag-gray">En attente</span>'}</div>`}).join('');
 }
 
