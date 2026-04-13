@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pour Anna ✦</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rose:#c9536a;--rose-light:#f9eff2;--rose-deep:#8b2d42;
+  --cream:#faf7f4;--warm:#f0e8df;--ink:#2a1f1f;--muted:#896e6e;
+  --border:rgba(180,120,120,0.18);--white:#fff;
+}
+html{scroll-behavior:smooth}
+body{background:var(--cream);color:var(--ink);font-family:'Jost',sans-serif;min-height:100vh;transition:background 1.4s ease}
+.serif{font-family:'Cormorant Garamond',serif}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes revealIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+@keyframes popIn{0%{transform:scale(.8);opacity:0}70%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+@keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
+
+.anim{animation:fadeUp .55s cubic-bezier(.16,1,.3,1) both}
+.anim-1{animation-delay:.07s}.anim-2{animation-delay:.15s}.anim-3{animation-delay:.24s}
+
+#particles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.particle{position:absolute;color:var(--rose);opacity:.12}
+
+/* NAV */
+nav{background:rgba(250,247,244,.93);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.nav-inner{max-width:860px;margin:0 auto;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:300;color:var(--rose);letter-spacing:.04em}
+.nav-links{display:flex;align-items:center;gap:1px;flex-wrap:wrap}
+.nav-btn{background:none;border:none;border-bottom:1px solid transparent;cursor:pointer;padding:5px 11px;font-family:'Jost',sans-serif;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);transition:all .2s}
+.nav-btn:hover{color:var(--rose)}.nav-btn.active{color:var(--rose);border-bottom-color:var(--rose)}
+.nav-btn.logout{margin-left:8px;opacity:.6;font-size:10px}
+
+/* PAGES */
+.page{display:none}.page.active{display:block}
+.container{max-width:640px;margin:0 auto;padding:60px 24px 80px;position:relative;z-index:1}
+.container-wide{max-width:780px;margin:0 auto;padding:60px 24px 80px;position:relative;z-index:1}
+
+/* TYPE */
+.eyebrow{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--rose);margin-bottom:14px}
+.eyebrow-muted{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+h1.big{font-family:'Cormorant Garamond',serif;font-size:44px;font-weight:300;line-height:1.1}
+h2.big{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:300;line-height:1.1}
+.hint{font-size:13.5px;color:var(--muted);font-style:italic;line-height:1.8}
+.label-sm{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:block}
+
+/* CARDS */
+.card{background:var(--white);border:1px solid var(--border);border-radius:3px;padding:28px}
+.card-rose{background:var(--rose-light);border:1px solid rgba(201,83,106,.15);border-radius:3px;padding:24px}
+
+/* SPOTIFY PLAYER */
+#spotify-wrap{margin-bottom:32px;animation:fadeUp .6s cubic-bezier(.16,1,.3,1) both}
+#spotify-wrap iframe{border-radius:12px;border:none}
+.spotify-hint{font-size:11px;color:var(--muted);text-align:center;margin-top:8px;letter-spacing:.06em}
+.no-music-hint{background:var(--warm);border-radius:3px;padding:16px 20px;font-size:13px;color:var(--muted);font-style:italic;text-align:center;margin-bottom:32px}
+
+/* INPUTS */
+.inp{width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:2px;background:var(--input-bg);font-family:'Jost',sans-serif;font-size:14px;color:var(--ink);outline:none;transition:border-color .2s}
+.inp:focus{border-color:var(--rose)}.inp::placeholder{color:var(--dash)}
+textarea.inp{resize:vertical;font-family:'Cormorant Garamond',serif;font-size:17px;line-height:1.75}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 28px;border-radius:2px;border:none;cursor:pointer;font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:500;transition:all .2s}
+.btn-primary{background:var(--rose);color:#fff}
+.btn-primary:hover:not(:disabled){background:var(--rose-deep);transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--rose);border:1px solid var(--border)}
+.btn-ghost:hover:not(:disabled){border-color:var(--rose);background:var(--rose-light)}
+.btn-sp{background:#1db954;color:#fff;border-radius:20px}
+.btn-sp:hover:not(:disabled){background:#17a349;transform:translateY(-1px)}
+.btn:disabled{opacity:.35;cursor:not-allowed;pointer-events:none}
+.btn-sm{padding:8px 16px;font-size:11px}
+
+/* CHOICE */
+.choice-grid{display:grid;gap:10px;margin-bottom:20px}
+.choice-btn{background:var(--white);border:1px solid var(--border);border-radius:3px;padding:14px 20px;cursor:pointer;font-family:'Jost',sans-serif;font-size:14px;color:var(--ink);text-align:left;transition:all .2s;display:flex;align-items:center;gap:12px}
+.choice-btn:hover{border-color:var(--rose);background:var(--rose-light)}
+.choice-btn.selected{border-color:var(--rose);background:var(--rose-light);color:var(--rose-deep)}
+.choice-radio{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;transition:all .2s}
+.choice-btn.selected .choice-radio{background:var(--rose);border-color:var(--rose)}
+
+/* TAGS */
+.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;letter-spacing:.06em;font-weight:500}
+.tag-green{background:#e6f5ec;color:#236b3e}
+.tag-rose{background:var(--rose-light);color:var(--rose-deep)}
+.tag-gray{background:#f0ebe8;color:var(--muted)}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:32px}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:3px;padding:22px 16px;text-align:center}
+.stat-n{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:300;color:#2a1f1f;line-height:1}
+.stat-n sub{font-size:20px;color:#5f4b4b}
+.stat-label{font-size:10.5px;color:#5f4b4b;letter-spacing:.06em;margin-top:8px;line-height:1.5}
+
+/* PROGRESS */
+.progress-track{height:4px;background:var(--warm);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:var(--rose);border-radius:2px;transition:width 1s cubic-bezier(.16,1,.3,1)}
+
+/* DOTS */
+.dots{display:flex;align-items:center;gap:10px;margin-bottom:48px}
+.dot{width:8px;height:8px;border-radius:4px;cursor:pointer;border:none;transition:all .3s}
+.dot.active{width:26px;background:var(--rose)}.dot.done{background:var(--rose);opacity:.5}.dot.idle{background:var(--border)}
+
+/* DASHES */
+.dash-row{display:flex;gap:7px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.dash{width:20px;height:3px;border-radius:2px;background:var(--dash);transition:background .35s}
+.dash.found{background:var(--rose)}
+
+/* CLUE IMAGE */
+.clue-img-wrap{position:relative;border-radius:4px;overflow:hidden;margin-bottom:16px;background:var(--warm);min-height:120px}
+.clue-img-wrap img{width:100%;max-height:280px;object-fit:contain;display:block;border-radius:4px;background:var(--warm)}
+.clue-img-err{width:100%;height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:var(--warm);border-radius:4px}
+
+/* COLOR */
+.color-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.color-swatch{height:56px;border-radius:3px;cursor:pointer;border:2px solid transparent;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.color-swatch:hover{transform:scale(1.05)}
+.color-swatch.selected{border-color:var(--ink);transform:scale(1.08);box-shadow:0 4px 16px rgba(0,0,0,.12)}
+
+/* LOGIN */
+#login-page{position:fixed;inset:0;background:var(--cream);z-index:200;display:flex;align-items:center;justify-content:center}
+.login-star{font-size:36px;color:var(--rose);text-align:center;margin-bottom:16px;display:block;animation:float 4s ease-in-out infinite}
+.error-msg{font-size:12px;color:var(--rose);text-align:center;margin-bottom:14px;min-height:18px}
+
+/* FINAL */
+.final-reveal{background:var(--rose-light);border:1px solid rgba(201,83,106,.2);border-radius:4px;padding:36px 32px;text-align:center;animation:revealIn .6s cubic-bezier(.16,1,.3,1) both}
+
+/* ADMIN */
+.answer-bar{border-left:3px solid var(--rose);background:var(--rose-light);border-radius:0 2px 2px 0;padding:16px 20px}
+.divider{border:none;border-top:1px solid var(--border);margin:24px 0}
+
+/* UTILS */
+.flex{display:flex}.fc{align-items:center}.fb{justify-content:space-between}.fwrap{flex-wrap:wrap}
+.g8{gap:8px}.g10{gap:10px}.g12{gap:12px}.g16{gap:16px}.g24{gap:24px}
+.mb8{margin-bottom:8px}.mb12{margin-bottom:12px}.mb16{margin-bottom:16px}.mb20{margin-bottom:20px}
+.mb24{margin-bottom:24px}.mb32{margin-bottom:32px}.mb36{margin-bottom:36px}
+.mb40{margin-bottom:40px}.mb48{margin-bottom:48px}
+.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt24{margin-top:24px}
+.tc{text-align:center}.italic{font-style:italic}.tm{color:var(--muted)}.tr{color:var(--rose)}
+</style>
+</head>
+<body>
+
+<div id="particles"></div>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="login-page">
+  <div style="width:100%;max-width:360px;padding:24px" class="anim">
+    <span class="login-star serif">✦</span>
+    <div class="tc mb32">
+      <h1 class="serif" style="font-size:38px;font-weight:300;letter-spacing:.04em;margin-bottom:8px">Pour Anna</h1>
+      <p class="hint">un jeu fait avec le cœur</p>
+    </div>
+    <div class="card" style="padding:36px 32px">
+      <div class="mb16"><label class="label-sm">Qui es-tu ?</label><input id="lu" class="inp" placeholder="anna" autocomplete="off"/></div>
+      <div class="mb20"><label class="label-sm">Mot de passe</label><input id="lp" class="inp" type="password" placeholder="lpb"/></div>
+      <div id="lerr" class="error-msg"></div>
+      <button class="btn btn-primary" style="width:100%" onclick="doLogin()">Entrer</button>
+    </div>
+    <p class="tc mt12 tm" style="font-size:11px;letter-spacing:.06em"><em>anna / lpb</em></p>
+  </div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div id="app" style="display:none">
+  <nav><div class="nav-inner">
+    <div class="nav-logo">✦ Pour Anna</div>
+    <div class="nav-links" id="navl"></div>
+  </div></nav>
+
+  <!-- ACCUEIL -->
+  <div class="page" id="page-home">
+    <div class="container">
+      <div class="tc mb40 anim">
+        <div class="eyebrow">Bienvenue</div>
+        <h1 class="big" style="margin-bottom:20px">Un message<br><em style="color:var(--rose)">pour toi, rien que toi</em></h1>
+        <p style="font-size:15px;color:var(--muted);line-height:1.85;max-width:430px;margin:0 auto">Ce site est un jeu, mais ce qu'il contient est réel. Réponds aux questions, débloque les indices, et découvre ce que je voulais te dire.</p>
+      </div>
+
+      <!-- SPOTIFY PLAYER (injecté dynamiquement) -->
+      <div id="spotify-zone" class="anim anim-1"></div>
+      <div id="series-zone" class="anim anim-1"></div>
+
+      <div class="stats-grid anim anim-1" id="hstats"></div>
+      <div class="card mb32 anim anim-2">
+        <div class="flex fb fc mb12" style="font-size:12px;color:var(--muted);letter-spacing:.06em"><span>Progression globale</span><span id="hpct">0%</span></div>
+        <div class="progress-track"><div class="progress-fill" id="hbar" style="width:0"></div></div>
+      </div>
+      <div id="hfinal" style="display:none" class="final-reveal mb32">
+        <div style="font-size:30px;margin-bottom:16px">✦</div>
+        <p class="serif" style="font-size:22px;font-style:italic;color:var(--rose-deep);line-height:1.75;white-space:pre-line" id="ftxt"></p>
+      </div>
+      <div class="flex g12 anim anim-3">
+        <button class="btn btn-primary" style="flex:1" onclick="goPage('questions')">Répondre aux questions →</button>
+        <button class="btn btn-ghost" onclick="goPage('indices')">Mes indices</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUESTIONS -->
+  <div class="page" id="page-questions">
+    <div class="container"><div class="dots" id="qdots"></div><div id="qcontent"></div></div>
+  </div>
+
+  <!-- INDICES -->
+  <div class="page" id="page-indices">
+    <div class="container">
+      <!-- Mini Spotify player dans la page indices -->
+      <div id="spotify-indices" style="margin-bottom:32px"></div>
+      <div class="mb48">
+        <div class="eyebrow">Tes indices</div>
+        <h2 class="big" style="margin-bottom:14px">Déchiffre le message</h2>
+        <p class="hint">Chaque image cache un mot. Trouve-les tous pour découvrir ce que je voulais te dire.</p>
+      </div>
+      <div id="clist"></div>
+    </div>
+  </div>
+
+  <!-- RÈGLES -->
+  <div class="page" id="page-rules">
+    <div class="container">
+      <div class="eyebrow">Comment jouer</div>
+      <h2 class="big mb40">Les règles du jeu</h2>
+      <div id="rcontent"></div>
+      <hr class="divider">
+      <p class="serif tr italic" style="font-size:20px;line-height:1.8">« Ce jeu a été fait avec soin,<br>avec patience, et avec beaucoup de sentiments. »</p>
+    </div>
+  </div>
+
+  <!-- ADMIN DASHBOARD -->
+  <div class="page" id="page-admin-home">
+    <div class="container-wide">
+      <div class="mb48">
+        <div class="eyebrow-muted">Administration</div>
+        <h2 class="big">Tableau de bord</h2>
+      </div>
+      <div class="mb24">
+        <button class="btn btn-ghost" onclick="adminResetSite()">Reset le site (effacer la memoire user)</button>
+      </div>
+      <div class="stats-grid" id="astats"></div>
+      <div class="card" id="aqlist"></div>
+    </div>
+  </div>
+  <!-- ADMIN RÉPONSES -->
+  <div class="page" id="page-admin-answers">
+    <div class="container-wide"><div class="mb40"><div class="eyebrow-muted">Administration</div><h2 class="big">Ses réponses</h2></div><div id="aanswers"></div></div>
+  </div>
+  <!-- ADMIN INDICES -->
+  <div class="page" id="page-admin-clues">
+    <div class="container-wide"><div class="mb40"><div class="eyebrow-muted">Administration</div><h2 class="big">Tentatives & indices</h2></div><div id="aclues"></div></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════════════════
+const USERS = { anna:{pass:'lpb',role:'user'}, moi:{pass:'juju2020',role:'admin'} };
+
+// CLUES — type:'image' = photo + mot à deviner / type:'word' = texte + mot à deviner
+// ⚠️ Pour les indices IMAGE : remplace img par l'URL de ta photo
+// (URL web ou nom de fichier si dans le même dossier ex: "thomin.jpg")
+const CLUES = [
+{
+    id:1, label:'Thomin', type:'word',
+    text:"τ principale",
+    word:"THOMIN", n:6
+  },  {
+    id:2, label:'Jul', type:'word',
+    word:"JUL", n:3
+  },
+  {
+    id:3, label:'Rugby', type:'image',
+    img:"r.jpg",
+    word:"RUGBY", n:5
+  },
+  {
+    id:4, label:'Brésil', type:'image',
+    img:"br.jpg",
+    word:"BRESIL", n:6
+  },
+  {
+    id:5, label:'Japon', type:'word',
+    text:"あなてちど",
+    word:"JAPON", n:5
+  },
+  {
+    id:6, label:'Occitanie', type:'image',
+    // ↓↓ REMPLACE par une photo de l'Occitanie ↓↓
+    img:"o.jpg",
+    word:"OCCITANIE", n:9
+  },
+  {
+    id:7, label:'Anagramme', type:'word',
+    text:"L’injure libérale",
+    word:"BREUILLERJULIAN", n:15
+  },
+  {
+    id:8, label:'Cheer', type:'image',
+    // ↓↓ REMPLACE par une photo de cheer ↓↓
+    img:"C.png",
+    word:"CHEER", n:5
+  },
+  {
+    id:9, label:'Pirates', type:'image',
+    // ↓↓ REMPLACE par une photo de pirates ↓↓
+    img:"perle.jpg",
+    word:"PIRATES", n:7
+  },
+];
+
+const QS = [
+  {id:1, text:"Est-ce que tu pourrais te remettre en couple ?",
+  type:'text', cid:1},
+  {id:2, text:"Quel est ta série préférée ?",
+  type:'text', cid:2},
+  {id:3, text:"Quel cadeau aimerais-tu recevoir de la part de ton partenaire ?",
+  type:'choice',
+   choices:['🌸  Bouquet de fleurs','🍫  Des chocolats'], cid:3},
+  {id:4, text:"Ton plus grand rêve ?",
+  type:'text', cid:4},
+  {id:5, text:"Quelle petite attention aimerais-tu recevoir de ton partenaire ?",
+  type:'text', cid:5},
+  {id:6, text:"Quelle est ta couleur préférée ?",
+  type:'color', cid:6},
+  {id:7, text:"C'est quoi ton rappeur préféré ?",
+  type:'music', cid:7},
+  {id:8, text:"Quel est ton plat préféré ?",
+  type:'text', cid:8},
+  {id:9, text:"Si tu devais décrire notre relation en un seul mot, lequel choisirais-tu ?",
+  type:'text', cid:9},
+];
+
+const FINAL = "Je t'aime.\n\nCe n'est pas une blague, pas un jeu.\nC'est la chose la plus vraie que j'aie jamais ressentie.\n\nMerci d'avoir joué le jeu jusqu'au bout.\n\n✦";
+const WHO_AM_I_PROMPT = 'Qui suis-je ?';
+const WHO_AM_I_ANSWERS = ['JULIAN BREUILLER','BREUILLER JULIAN','JULIAN','JUL'];
+const WHO_AM_I_MAX_TRIES = 3;
+const QUESTION_DELAY_MS = 60*60*1000;
+
+const COLORS = [
+  {name:'Rose poudré',hex:'#fce8ee',text:'#6b2d3e'},{name:'Lavande',hex:'#ede8f9',text:'#4a3575'},
+  {name:'Bleu ciel',hex:'#e5f0fb',text:'#1e4d82'},{name:'Menthe',hex:'#e4f5ed',text:'#1a5c3a'},
+  {name:'Pêche',hex:'#fde8d8',text:'#7a3318'},{name:'Lilas',hex:'#f3e8f9',text:'#5c2a7a'},
+  {name:'Jaune miel',hex:'#fdf3d8',text:'#6b4a0e'},{name:'Corail',hex:'#fde8e4',text:'#7a2a1e'},
+];
+
+// Mapping rappeur → Spotify artist ID
+// Les plus connus sont pré-mappés. Si son rappeur n'est pas ici,
+// Spotify Search API sera utilisée comme fallback (résultat en lien)
+const SPOTIFY_IDS = {
+  'jul':           '3IW7ScrzXmPvZhB27hmfgy',
+  'ninho':         '3yDIp0qBDIANIE3MZeQFDt',
+  'booba':         '5SXKhUBBEYeEEFLZhVU0P6',
+  'sch':           '6obXQbvvk5m5qLiQa8JV8v',
+  'damso':         '5dHt1vcEm9qb8fCyLcB3HL',
+  'nekfeu':        '74whJHfnaeA5HKXqQ3t9VR',
+  'niska':         '2QhIaHFWHetxwdX3YUJfVJ',
+  'lacrim':        '2bZTppxkJpU6OMl4MQFxE8',
+  'hamza':         '5ZtaOdQkHILMECMRvmMuft',
+  'freeze corleone':'5ZZkBr9PrRFbRMZ2IjH6v2',
+  'lil durk':      '3hcs9uc56yIGFCSy9leWe7',
+  'drake':         '3TVXtAsR1Inumwj472S9r4',
+  'lil baby':      '5f7VJjfbwm532GiveGC0ZK',
+  'central cee':   '4oLeXFyACqeem2VImYeBFe',
+  'gazo':          '5l4AvE0bRmBHxEGlDvIFyb',
+  'diddy':         '5gNMSFkfhOxMROww0VCPEH',
+  'tiakola':       '61gHgUlYMFyqiHFkCWMXH9',
+  'werenoi':       '3gNwRTXVkBobWO3TbC2JQz',
+  'naps':          '1yxj0qqQCuJQVxH3pxBf77',
+  'tayc':          '0hRQr5YHNfWMVULBd0fDTU',
+  'abou debeing':  '36rLpFbOJqKc8ItAQSzZmX',
+  'lefa':          '5cT6TJvlqIwGKB7VHRv8aF',
+  'koba lad':      '0GaRWDECJ4pIgOtUPQgF24',
+  'maes':          '7nrOHm97W3UpgGWOuJXWH6',
+  'soolking':      '37FLR6JFiaqe3yFFFG39Hb',
+  'alonzo':        '5kxFXxJPGFoiRGeMzdKJml',
+  'lartiste':      '1qBuVSC5tXLw7gfasDAZRV',
+  'gradur':        '3rEgjkPSoMv0WfO6TjBkNx',
+  'kaaris':        '2KpHMRCtHfGzjJuPoUCsBz',
+  'rohff':         '7w2l3bXpqn4dPKhyFKQHK7',
+  'vald':          '1rExrV7xXGIFsR3KKiMKGp',
+  'dinos':         '2eadUEkQVbhxiG9xREVxuS',
+  'lomepal':       '6HqVrHmqEt3vEMhECy8mvJ',
+  'orelsan':       '1pvGHD8bMONBLGP6fW9jEg',
+  'bigflo et oli': '3uR1GPEH7P8ynMGKKVmMkJ',
+  'soprano':       '5qJThRRxT8N9R5wl5D4xly',
+  'sinik':         '1Cf8AJXBVF0aLNkQXSJKrp',
+  'sexion d\'assaut':'1gBUSTR3olvz6VUSBiZ6z3',
+  'mafia k-1 fry': '5lMMSmSMfD9vP0XT7M5MSi',
+  'the game':      '0du5cEVh5yTK9QJze8zA0C',
+  'kendrick lamar':'2YZyLoL8N0Wb9xBt1NhZWg',
+  'tyler the creator':'4V8LLVI79E6jOaaTmH2ZIb',
+  'j cole':        '6l3HvQ5sa6mXTsMTB19rO5',
+  'future':        '1RyvyyTE3xzB2ZywiAwp0i',
+  'lil uzi vert':  '0Y5tJX1MQlPlqiwlOH1tJY',
+  'travis scott':  '0Y5tJX1MQlPlqiwlOH1tJY',
+  'post malone':   '246dkjvS1zLTtiykXe5h60',
+  'bad bunny':     '4q3ewBCX7sLwd24euuV69X',
+  'eminem':        '7dGJo4pcD2V6oG8kP0tJRR',
+};
+
+const SERIES_OPENINGS = [
+  {keywords:['arcane','league of legends','lol','jinx','vi'],label:'Arcane',youtubeId:'fXmAurh012s'},
+  {keywords:['game of thrones','got','westeros','stark','targaryen'],label:'Game of Thrones',youtubeId:'s7L2PVdrb_8'},
+  {keywords:['stranger things','eleven','hawkins'],label:'Stranger Things',youtubeId:'-RcPZdihrp4'},
+  {keywords:['euphoria','rue','jules','zendaya'],label:'Euphoria',youtubeId:'BU10M5hFdeY'},
+  {keywords:['friends','ross','rachel','monica','chandler','phoebe','joey'],label:'Friends',youtubeId:'SCQGnVrTsAM'},
+  {keywords:['the vampire diaries','vampire diaries','tvd','elena','damon','stefan'],label:'The Vampire Diaries',youtubeId:'uCy4W32nW8w'},
+  {keywords:['breaking bad','walter white','heisenberg','jesse pinkman'],label:'Breaking Bad',youtubeId:'F1HNuAE9WdU'},
+  {keywords:['better call saul','saul goodman','jimmy mcgill'],label:'Better Call Saul',youtubeId:'ebMe-l2QfM'},
+  {keywords:['prison break','michael scofield','scofield'],label:'Prison Break',youtubeId:'AL9zLctDJaU'},
+  {keywords:['the office','michael scott','dunder mifflin'],label:'The Office',youtubeId:'b9GilKnpiv0'},
+  {keywords:['suits','harvey specter','mike ross'],label:'Suits',youtubeId:'x7qpay9JqE4'},
+  {keywords:['how i met your mother','himym','ted mosby','barney stinson'],label:'How I Met Your Mother',youtubeId:'aJtVL2_fA5w'},
+  {keywords:['brooklyn nine nine','b99','jake peralta'],label:'Brooklyn Nine-Nine',youtubeId:'ffyKY3Dj5ZE'},
+  {keywords:['the walking dead','walking dead','rick grimes'],label:'The Walking Dead',youtubeId:'sfAc2U20uyg'},
+  {keywords:['house of the dragon','hotd'],label:'House of the Dragon',youtubeId:'DotnJ7tTA34'},
+];
+
+const NAV_U = [['home','Accueil'],['questions','Questions'],['indices','Indices'],['rules','Règles']];
+const NAV_A = [['admin-home','Dashboard'],['admin-answers','Réponses'],['admin-clues','Indices admin']];
+
+const DEFAULT_THEME = {
+  cream:'#faf7f4',
+  warm:'#f0e8df',
+  ink:'#2a1f1f',
+  muted:'#896e6e',
+  dash:'#6d5555',
+  'input-bg':'#e6dcd2',
+  rose:'#c9536a',
+  roseLight:'#f9eff2',
+  roseDeep:'#8b2d42',
+  border:'rgba(180,120,120,0.18)',
+};
+
+const DEFAULT_PARTICLES = ['✦','·','✧','◦','∘'];
+const SERIES_THEMES = [
+  {
+    id:'arcane',label:'Arcane',
+    keywords:['arcane','league of legends','lol','jinx','vi','piltover','zaun'],
+    rose:'#6d4fb4',roseDeep:'#3f2c74',roseLight:'#ebe5fa',
+    particles:['✦','◇','⚙','·','✧']
+  },
+  {
+    id:'got',label:'Game of Thrones',
+    keywords:['game of thrones','got','westeros','stark','targaryen','jon snow'],
+    rose:'#6d727f',roseDeep:'#2f3440',roseLight:'#e8ebf1',
+    particles:['❄','⚔','✦','·','◦']
+  },
+  {
+    id:'stranger-things',label:'Stranger Things',
+    keywords:['stranger things','eleven','hawkins','demogorgon'],
+    rose:'#bb4a5c',roseDeep:'#6d2330',roseLight:'#f8e3e8',
+    particles:['✦','⬡','·','✧','◦']
+  },
+  {
+    id:'euphoria',label:'Euphoria',
+    keywords:['euphoria','rue','jules','zendaya'],
+    rose:'#9b5fc6',roseDeep:'#5e2f7d',roseLight:'#f2e7fb',
+    particles:['✧','✦','◦','·','∘']
+  },
+  {
+    id:'friends',label:'Friends',
+    keywords:['friends','ross','rachel','monica','chandler','phoebe','joey'],
+    rose:'#c4854d',roseDeep:'#7b4e2a',roseLight:'#f9ecde',
+    particles:['✦','☕','·','◦','✧']
+  },
+  {
+    id:'vampire-diaries',label:'The Vampire Diaries',
+    keywords:['the vampire diaries','vampire diaries','tvd','elena','damon','stefan'],
+    rose:'#8e4c5d',roseDeep:'#4c2631',roseLight:'#f2e4e9',
+    particles:['🦇','✦','·','✧','◦']
+  },
+];
+
+function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
+function hexToRgb(hex){
+  const h=(hex||'').replace('#','').trim();
+  if(!/^[0-9a-fA-F]{6}$/.test(h)) return null;
+  return {r:parseInt(h.slice(0,2),16),g:parseInt(h.slice(2,4),16),b:parseInt(h.slice(4,6),16)};
+}
+function rgbToHex(r,g,b){
+  const toHex=n=>clamp(Math.round(n),0,255).toString(16).padStart(2,'0');
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+function mixHex(a,b,t){
+  const ca=hexToRgb(a),cb=hexToRgb(b);
+  if(!ca||!cb) return a;
+  return rgbToHex(ca.r+(cb.r-ca.r)*t,ca.g+(cb.g-ca.g)*t,ca.b+(cb.b-ca.b)*t);
+}
+function rgbToHsl(r,g,b){
+  r/=255;g/=255;b/=255;
+  const max=Math.max(r,g,b),min=Math.min(r,g,b);
+  let h=0,s=0,l=(max+min)/2;
+  if(max!==min){
+    const d=max-min;
+    s=l>0.5?d/(2-max-min):d/(max+min);
+    switch(max){
+      case r:h=(g-b)/d+(g<b?6:0);break;
+      case g:h=(b-r)/d+2;break;
+      default:h=(r-g)/d+4;
+    }
+    h/=6;
+  }
+  return {h:h*360,s:s*100,l:l*100};
+}
+function hslToRgb(h,s,l){
+  h=((h%360)+360)%360;
+  s=clamp(s,0,100)/100;
+  l=clamp(l,0,100)/100;
+  if(s===0){
+    const v=Math.round(l*255);
+    return {r:v,g:v,b:v};
+  }
+  const q=l<0.5?l*(1+s):l+s-l*s;
+  const p=2*l-q;
+  const hk=h/360;
+  const tc=[hk+1/3,hk,hk-1/3];
+  const c=tc.map(t=>{
+    let tt=t;
+    if(tt<0)tt+=1;
+    if(tt>1)tt-=1;
+    if(tt<1/6)return p+(q-p)*6*tt;
+    if(tt<1/2)return q;
+    if(tt<2/3)return p+(q-p)*(2/3-tt)*6;
+    return p;
+  });
+  return {r:Math.round(c[0]*255),g:Math.round(c[1]*255),b:Math.round(c[2]*255)};
+}
+function relLuminance(hex){
+  const c=hexToRgb(hex);
+  if(!c) return 1;
+  const f=v=>{
+    const x=v/255;
+    return x<=0.03928?x/12.92:Math.pow((x+0.055)/1.055,2.4);
+  };
+  return 0.2126*f(c.r)+0.7152*f(c.g)+0.0722*f(c.b);
+}
+function applyThemeFromColor(hex){
+  const base=(hexToRgb(hex)?hex:'#fce8ee').toLowerCase();
+  const root=document.documentElement;
+  const lum=relLuminance(base);
+  const isLight=lum>0.55;
+  const isDark=lum<0.28;
+  const ink=isLight?'#231b1b':'#f6f1f1';
+  const muted=isLight?mixHex(ink,base,0.45):mixHex(ink,base,0.35);
+  const warm=isLight
+    ?mixHex(base,'#000000',0.06)
+    :(isDark?mixHex(base,'#000000',0.14):mixHex(base,'#ffffff',0.08));
+
+  const hsl=rgbToHsl(...Object.values(hexToRgb(base)));
+  const compHue=(hsl.h+180)%360;
+  const roseRgb=hslToRgb(
+    compHue,
+    clamp(Math.max(hsl.s,45),38,72),
+    clamp(isLight?38:(isDark?56:64),30,72)
+  );
+  const rose=rgbToHex(roseRgb.r,roseRgb.g,roseRgb.b);
+  const roseDeep=isLight
+    ?mixHex(rose,'#000000',0.3)
+    :(isDark?mixHex(rose,'#000000',0.32):mixHex(rose,'#000000',0.24));
+  const roseLight=isLight
+    ?mixHex(base,'#ffffff',0.45)
+    :(isDark?mixHex(base,'#000000',0.08):mixHex(base,'#ffffff',0.2));
+
+  const dash=isLight?mixHex(ink,base,0.6):mixHex(ink,base,0.5);
+  const inputBg=isLight?mixHex(warm,ink,0.08):mixHex(warm,ink,0.12);
+  root.style.setProperty('--cream',base);
+  root.style.setProperty('--warm',warm);
+  root.style.setProperty('--ink',ink);
+  root.style.setProperty('--muted',muted);
+  root.style.setProperty('--dash',dash);
+  root.style.setProperty('--input-bg',inputBg);
+  root.style.setProperty('--rose',rose);
+  root.style.setProperty('--rose-deep',roseDeep);
+  root.style.setProperty('--rose-light',roseLight);
+  root.style.setProperty('--border',isLight?'rgba(35,27,27,0.16)':'rgba(246,241,241,0.24)');
+  document.body.style.background=base;
+}
+function resetTheme(){
+  const root=document.documentElement;
+  root.style.setProperty('--cream',DEFAULT_THEME.cream);
+  root.style.setProperty('--warm',DEFAULT_THEME.warm);
+  root.style.setProperty('--ink',DEFAULT_THEME.ink);
+  root.style.setProperty('--muted',DEFAULT_THEME.muted);
+  root.style.setProperty('--dash',DEFAULT_THEME.dash);
+  root.style.setProperty('--input-bg',DEFAULT_THEME['input-bg']);
+  root.style.setProperty('--rose',DEFAULT_THEME.rose);
+  root.style.setProperty('--rose-deep',DEFAULT_THEME.roseDeep);
+  root.style.setProperty('--rose-light',DEFAULT_THEME.roseLight);
+  root.style.setProperty('--border',DEFAULT_THEME.border);
+  document.body.style.background=DEFAULT_THEME.cream;
+}
+
+function normalizeText(v){
+  return (v||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+}
+
+function findSeriesTheme(seriesName){
+  const s=normalizeText(seriesName);
+  if(!s) return null;
+  return SERIES_THEMES.find(theme=>theme.keywords.some(k=>s.includes(normalizeText(k))))||null;
+}
+
+function renderParticles(symbols=DEFAULT_PARTICLES){
+  const el=document.getElementById('particles');
+  if(!el) return;
+  el.innerHTML='';
+  symbols.forEach((c,i)=>{
+    for(let j=i;j<16;j+=5){
+      const d=document.createElement('div');d.className='particle';d.textContent=c;
+      d.style.cssText=`left:${4+j*5.8}%;top:${8+(j%6)*15}%;font-size:${j%2===0?10:6}px;animation:float ${3+j*.38}s ease-in-out infinite;animation-delay:${j*.2}s`;
+      el.appendChild(d);
+    }
+  });
+}
+
+function applySeriesTheme(seriesName){
+  const theme=findSeriesTheme(seriesName);
+  const root=document.documentElement;
+  const logo=document.querySelector('.nav-logo');
+
+  if(!theme){
+    renderParticles(DEFAULT_PARTICLES);
+    if(logo) logo.textContent='✦ pour anna';
+    return;
+  }
+
+  root.style.setProperty('--rose',theme.rose);
+  root.style.setProperty('--rose-deep',theme.roseDeep);
+  root.style.setProperty('--rose-light',theme.roseLight);
+  root.style.setProperty('--border',mixHex(theme.rose,'#ffffff',0.68));
+  renderParticles(theme.particles||DEFAULT_PARTICLES);
+  if(logo) logo.textContent=`✦ pour anna · ${theme.label}`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// STORE
+// ══════════════════════════════════════════════════════════════
+const S = {
+  load(){
+    try{const d=JSON.parse(localStorage.getItem('pt5')||'{}');
+      d.ans=d.ans||{};d.ansAt=d.ansAt||{};d.att=d.att||{};d.val=d.val||{};d.bg=d.bg||null;
+      d.who=d.who||{tries:[],found:false};
+      d.who.tries=Array.isArray(d.who.tries)?d.who.tries:[];
+      d.who.found=!!d.who.found;
+      return d}
+    catch{return{ans:{},ansAt:{},att:{},val:{},bg:null,who:{tries:[],found:false}}}
+  },
+  save(d){try{localStorage.setItem('pt5',JSON.stringify(d))}catch{}},
+  saveAns(id,v){const d=this.load();d.ans[id]=v;d.ansAt[id]=new Date().toISOString();this.save(d)},
+  addAtt(cid,w){const d=this.load();d.att[cid]=d.att[cid]||[];d.att[cid].push({w,date:new Date().toISOString()});this.save(d)},
+  valid(cid){const d=this.load();d.val[cid]=true;this.save(d)},
+  setBg(hex){const d=this.load();d.bg=hex;this.save(d)},
+  addWhoTry(v){const d=this.load();d.who=d.who||{tries:[],found:false};d.who.tries.push(v);this.save(d)},
+  setWhoFound(){const d=this.load();d.who=d.who||{tries:[],found:false};d.who.found=true;this.save(d)},
+};
+
+function formatRemaining(ms){
+  const total=Math.max(0,Math.ceil(ms/1000));
+  const h=Math.floor(total/3600);
+  const m=Math.floor((total%3600)/60);
+  const s=total%60;
+  return `${h}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+}
+
+function getQuestionUnlockInfo(index,d){
+  if(index===0) return {unlocked:true,remaining:0,waitingPrevious:false};
+  const prev=QS[index-1];
+  if(d.ans[prev.id]===undefined) return {unlocked:false,remaining:QUESTION_DELAY_MS,waitingPrevious:true};
+  const at=d.ansAt&&d.ansAt[prev.id]?new Date(d.ansAt[prev.id]).getTime():null;
+  if(!at||Number.isNaN(at)) return {unlocked:true,remaining:0,waitingPrevious:false};
+  const remaining=QUESTION_DELAY_MS-(Date.now()-at);
+  return {unlocked:remaining<=0,remaining:Math.max(0,remaining),waitingPrevious:false};
+}
+
+// ══════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════
+let role=null, curQ=0;
+
+// ══════════════════════════════════════════════════════════════
+// PARTICLES
+// ══════════════════════════════════════════════════════════════
+renderParticles();
+
+// ══════════════════════════════════════════════════════════════
+// SPOTIFY HELPERS
+// ══════════════════════════════════════════════════════════════
+function getSpotifyId(artistName){
+  const key=artistName.trim().toLowerCase();
+  // Direct match
+  if(SPOTIFY_IDS[key]) return SPOTIFY_IDS[key];
+  // Partial match
+  for(const k of Object.keys(SPOTIFY_IDS)){
+    if(key.includes(k)||k.includes(key)) return SPOTIFY_IDS[k];
+  }
+  return null;
+}
+
+function buildSpotifyEmbed(artistName, compact=false){
+  const id=getSpotifyId(artistName);
+  if(!id) return null;
+  // compact = petit player pour page indices, sinon grand player accueil
+  const h=compact?80:152;
+  return `<iframe
+    src="https://open.spotify.com/embed/artist/${id}"
+    width="100%" height="${h}" frameborder="0"
+    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+    loading="eager" style="border-radius:${compact?8:12}px"></iframe>`;
+}
+
+function injectSpotify(artistName){
+  // Page accueil — grand player
+  const zone=document.getElementById('spotify-zone');
+  if(zone){
+    const embed=buildSpotifyEmbed(artistName,false);
+    if(embed){
+      zone.innerHTML=`<div id="spotify-wrap" class="mb32">
+        <div class="label-sm" style="margin-bottom:10px;text-align:center">♫ ${artistName}</div>
+        ${embed}
+        <p class="spotify-hint">Clique sur une musique pour l'écouter</p>
+      </div>`;
+    } else {
+      // Rappeur non trouvé dans la liste → lien Spotify search
+      const q=encodeURIComponent(artistName);
+      zone.innerHTML=`<div class="no-music-hint mb32">
+        ♫ <strong>${artistName}</strong> — 
+        <a href="https://open.spotify.com/search/${q}" target="_blank" style="color:var(--rose)">Écouter sur Spotify →</a>
+      </div>`;
+    }
+  }
+
+  // Page indices — compact player
+  const zone2=document.getElementById('spotify-indices');
+  if(zone2){
+    const embed=buildSpotifyEmbed(artistName,true);
+    if(embed){
+      zone2.innerHTML=`<div style="opacity:.85">${embed}</div>`;
+    }
+  }
+}
+
+function findSeriesOpening(seriesName){
+  const s=normalizeText(seriesName);
+  if(!s) return null;
+  return SERIES_OPENINGS.find(item=>item.keywords.some(k=>s.includes(normalizeText(k))))||null;
+}
+
+function injectSeriesOpening(seriesName){
+  const zone=document.getElementById('series-zone');
+  if(!zone) return;
+  const rawName=(seriesName||'').toString().trim();
+  if(!rawName){
+    zone.innerHTML='';
+    return;
+  }
+  const match=findSeriesOpening(seriesName);
+  if(!match||!match.youtubeId){
+    const query=`${rawName} opening`;
+    const watchUrl=`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+    zone.innerHTML=`<div id="spotify-wrap" class="mb32">
+      <div class="label-sm" style="margin-bottom:10px;text-align:center">♫ Générique de ${rawName}</div>
+      <a href="${watchUrl}" target="_blank" rel="noopener" style="display:block;position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--border)">
+        <div style="width:100%;display:flex;align-items:center;justify-content:center;aspect-ratio:16/9;background:var(--warm);color:var(--ink);font-size:13px;letter-spacing:.08em;text-transform:uppercase">${rawName}</div>
+        <span style="position:absolute;inset:auto 12px 12px auto;background:rgba(0,0,0,.72);color:#fff;padding:7px 10px;border-radius:20px;font-size:11px;letter-spacing:.06em">▶ Rechercher</span>
+      </a>
+      <p class="spotify-hint">${rawName}</p>
+      <p class="tc" style="margin-top:8px"><a href="${watchUrl}" target="_blank" rel="noopener" style="color:var(--rose);font-size:12px;letter-spacing:.06em">Rechercher sur YouTube ↗</a></p>
+    </div>`;
+    return;
+  }
+  const watchUrl=`https://www.youtube.com/watch?v=${match.youtubeId}`;
+  const thumbUrl=`https://img.youtube.com/vi/${match.youtubeId}/hqdefault.jpg`;
+  zone.innerHTML=`<div id="spotify-wrap" class="mb32">
+    <div class="label-sm" style="margin-bottom:10px;text-align:center">♫ Générique de ${match.label}</div>
+    <a href="${watchUrl}" target="_blank" rel="noopener" style="display:block;position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--border)">
+      <img src="${thumbUrl}" alt="Generique ${match.label}" style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover;background:var(--warm)"/>
+      <span style="position:absolute;inset:auto 12px 12px auto;background:rgba(0,0,0,.72);color:#fff;padding:7px 10px;border-radius:20px;font-size:11px;letter-spacing:.06em">▶ Regarder</span>
+    </a>
+    <p class="spotify-hint">Lecture directe sur YouTube</p>
+    <p class="tc" style="margin-top:8px"><a href="${watchUrl}" target="_blank" rel="noopener" style="color:var(--rose);font-size:12px;letter-spacing:.06em">Ouvrir sur YouTube ↗</a></p>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// LOGIN
+// ══════════════════════════════════════════════════════════════
+function doLogin(){
+  const u=document.getElementById('lu').value.trim().toLowerCase();
+  const p=document.getElementById('lp').value.trim().toLowerCase();
+  const err=document.getElementById('lerr');
+  if(USERS[u]&&USERS[u].pass===p){
+    role=USERS[u].role;
+    document.getElementById('login-page').style.display='none';
+    document.getElementById('app').style.display='block';
+    buildNav();
+    const d=S.load();
+    if(d.bg) applyThemeFromColor(d.bg);
+    else resetTheme();
+    goPage(role==='admin'?'admin-home':'home');
+  }else{
+    err.textContent='Identifiants incorrects…';
+    setTimeout(()=>err.textContent='',2200);
+  }
+}
+document.getElementById('lp').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+document.getElementById('lu').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+
+// ══════════════════════════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════════════════════════
+function buildNav(){
+  const nl=document.getElementById('navl');nl.innerHTML='';
+  (role==='admin'?NAV_A:NAV_U).forEach(([id,label])=>{
+    const b=document.createElement('button');b.className='nav-btn';b.dataset.page=id;
+    b.textContent=(role==='user'&&id==='indices')?`Indices (${unlockedCount()})`:label;
+    b.onclick=()=>goPage(id);nl.appendChild(b);
+  });
+  const o=document.createElement('button');o.className='nav-btn logout';o.textContent='Quitter';
+  o.onclick=()=>{
+    role=null;
+    document.getElementById('login-page').style.display='flex';
+    document.getElementById('app').style.display='none';
+    document.getElementById('lu').value='';document.getElementById('lp').value='';
+    resetTheme();
+    const sz=document.getElementById('series-zone');
+    if(sz) sz.innerHTML='';
+  };
+  nl.appendChild(o);
+}
+function unlockedCount(){const d=S.load();return QS.filter(q=>d.ans[q.id]!==undefined).length}
+function navActive(id){
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
+  if(role==='user') document.querySelectorAll('.nav-btn').forEach(b=>{
+    if(b.dataset.page==='indices') b.textContent=`Indices (${unlockedCount()})`;
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+// ROUTER
+// ══════════════════════════════════════════════════════════════
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const pg=document.getElementById(`page-${id}`);if(pg)pg.classList.add('active');
+  navActive(id);window.scrollTo(0,0);
+  ({
+    home:renderHome, questions:renderQuestions, indices:renderIndices, rules:renderRules,
+    'admin-home':renderAdminHome,'admin-answers':renderAdminAnswers,'admin-clues':renderAdminClues
+  }[id]||Function())();
+}
+
+// ══════════════════════════════════════════════════════════════
+// HOME
+// ══════════════════════════════════════════════════════════════
+function renderHome(){
+  const d=S.load();
+  const ans=Object.keys(d.ans).length;
+  const wordVal=CLUES.filter(c=>d.val[c.id]).length;
+  const pct=Math.round(ans/QS.length*100);
+
+  // Inject Spotify if music question answered
+  const musicAns=d.ans[7]; // question 7 = rappeur
+  const zone=document.getElementById('spotify-zone');
+  if(musicAns&&musicAns.artist){
+    injectSpotify(musicAns.artist);
+  } else {
+    zone.innerHTML='';
+  }
+  injectSeriesOpening(d.ans[2]);
+
+  document.getElementById('hstats').innerHTML=[
+    {n:ans,t:QS.length,l:'Questions\nrépondues'},
+    {n:unlockedCount(),t:QS.length,l:'Indices\ndébloqués'},
+    {n:wordVal,t:CLUES.length,l:'Mots\ntrouvés'},
+  ].map(s=>`<div class="stat-card"><div class="stat-n">${s.n}<sub>/${s.t}</sub></div><div class="stat-label" style="white-space:pre-line">${s.l}</div></div>`).join('');
+
+  document.getElementById('hpct').textContent=pct+'%';
+  document.getElementById('hbar').style.width=pct+'%';
+
+  const allDone=wordVal===CLUES.length;
+  const fin=document.getElementById('hfinal');
+  if(allDone){fin.style.display='block';document.getElementById('ftxt').textContent=FINAL}
+  else fin.style.display='none';
+}
+
+// ══════════════════════════════════════════════════════════════
+// QUESTIONS
+// ══════════════════════════════════════════════════════════════
+function renderQuestions(){
+  const d=S.load();
+  const unlockByIdx=QS.map((_,i)=>getQuestionUnlockInfo(i,d));
+  const dotsEl=document.getElementById('qdots');dotsEl.innerHTML='';
+  QS.forEach((q,i)=>{
+    const b=document.createElement('button');
+    const isLocked=d.ans[q.id]===undefined&&!unlockByIdx[i].unlocked;
+    b.className='dot '+(i===curQ?'active':d.ans[q.id]!==undefined?'done':'idle');
+    b.disabled=isLocked;
+    b.style.opacity=isLocked?.35:1;
+    b.onclick=()=>{if(isLocked)return;curQ=i;renderQuestions()};dotsEl.appendChild(b);
+  });
+  const sp=document.createElement('span');sp.style.cssText='font-size:12px;color:var(--muted);margin-left:6px';
+  sp.textContent=(curQ+1)+' / '+QS.length;dotsEl.appendChild(sp);
+
+  const q=QS[curQ];const saved=d.ans[q.id];
+  const curUnlock=unlockByIdx[curQ];
+  const el=document.getElementById('qcontent');el.innerHTML='';el.className='anim';
+
+  el.insertAdjacentHTML('beforeend',`
+    <div class="mb36">
+      <div class="eyebrow" style="margin-bottom:14px">Question ${q.id} / ${QS.length}</div>
+      <h2 class="serif" style="font-size:32px;font-weight:300;line-height:1.35;color:var(--ink);margin-bottom:14px">${q.text}</h2>
+    </div>`);
+
+  if(saved!==undefined){
+    let prev='';
+    if(q.type==='music'){
+      prev=`<p style="font-size:15px;font-weight:500;color:var(--ink);margin-bottom:6px">${saved.artist}</p>
+        <p style="font-size:12px;color:var(--muted)">Sa musique joue sur l'accueil ✦</p>`;
+    }
+    else if(q.type==='choice') prev=`<p style="font-size:15px;color:var(--ink)">${saved}</p>`;
+    else if(q.type==='color'){
+      const colorHex=(saved&&typeof saved==='object'&&saved.hex)?saved.hex:(typeof saved==='string'?saved:'#fce8ee');
+      const colorName=(saved&&typeof saved==='object'&&saved.name)?saved.name:'Couleur choisie';
+      prev=`<div class="flex fc g12"><div style="width:30px;height:30px;border-radius:50%;background:${colorHex};border:2px solid rgba(0,0,0,.1)"></div><p style="font-size:14px;color:var(--ink)">${colorName} <span style="color:var(--muted);font-size:12px">(${colorHex})</span></p></div>`;
+    }
+    else prev=`<p style="font-size:15px;color:var(--ink);line-height:1.8">${saved}</p>`;
+    el.insertAdjacentHTML('beforeend',`
+      <div class="card-rose mb20"><div class="label-sm" style="margin-bottom:10px;color:var(--rose)">Ta réponse</div>${prev}</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:24px;display:flex;align-items:center;gap:6px"><span style="color:var(--rose)">✓</span> Indice #${q.cid} débloqué !</p>`);
+  } else if(!curUnlock.unlocked) {
+    const detail=curUnlock.waitingPrevious
+      ?'Tu dois d\'abord répondre à la question précédente.'
+      :`Cette question se débloque ${formatRemaining(curUnlock.remaining)} après ta dernière réponse.`;
+    el.insertAdjacentHTML('beforeend',`
+      <div class="card-rose mb20" style="padding:22px">
+        <div class="label-sm" style="margin-bottom:10px;color:var(--rose)">Verrou temporaire</div>
+        <p style="font-size:14px;color:var(--ink);line-height:1.8">${detail}</p>
+      </div>`);
+    if(!curUnlock.waitingPrevious){
+      setTimeout(()=>{
+        const pg=document.getElementById('page-questions');
+        if(pg&&pg.classList.contains('active')) renderQuestions();
+      },1000);
+    }
+  } else {
+    buildForm(el,q);
+  }
+
+  const nav=document.createElement('div');nav.className='flex fb';nav.style.cssText='border-top:1px solid var(--border);padding-top:24px;margin-top:24px';
+  const prev=document.createElement('button');prev.className='btn btn-ghost';prev.textContent='← Précédent';prev.disabled=curQ===0;prev.onclick=()=>{curQ=Math.max(0,curQ-1);renderQuestions()};
+  const next=document.createElement('button');next.className='btn btn-ghost';next.textContent='Suivant →';next.disabled=curQ===QS.length-1;next.onclick=()=>{curQ=Math.min(QS.length-1,curQ+1);renderQuestions()};
+  nav.appendChild(prev);nav.appendChild(next);el.appendChild(nav);
+}
+
+function buildForm(el,q){
+  const w=document.createElement('div');
+
+  if(q.type==='text'){
+    const ta=document.createElement('textarea');ta.className='inp mb16';ta.rows=5;ta.placeholder='Écris librement…';
+    const btn=document.createElement('button');btn.className='btn btn-primary';btn.textContent='Valider →';btn.disabled=true;
+    ta.addEventListener('input',()=>btn.disabled=!ta.value.trim());
+    btn.onclick=()=>{
+      if(!ta.value.trim())return;
+      const answer=ta.value.trim();
+      S.saveAns(q.id,answer);
+      showUnlock(w,q);
+    };
+    w.appendChild(ta);w.appendChild(btn);
+  }
+
+  else if(q.type==='choice'){
+    const grid=document.createElement('div');grid.className='choice-grid';
+    let chosen=null;
+    q.choices.forEach(c=>{
+      const cb=document.createElement('button');cb.className='choice-btn';
+      cb.innerHTML=`<div class="choice-radio"></div><span>${c}</span>`;
+      cb.onclick=()=>{grid.querySelectorAll('.choice-btn').forEach(b=>b.classList.remove('selected'));cb.classList.add('selected');chosen=c;btn.disabled=false};
+      grid.appendChild(cb);
+    });
+    const btn=document.createElement('button');btn.className='btn btn-primary';btn.style.marginTop='4px';btn.textContent='Valider →';btn.disabled=true;
+    btn.onclick=()=>{if(!chosen)return;S.saveAns(q.id,chosen);showUnlock(w,q)};
+    w.appendChild(grid);w.appendChild(btn);
+  }
+
+  else if(q.type==='music'){
+    w.innerHTML=`
+      <div class="mb16">
+        <label class="label-sm">Nom du rappeur</label>
+        <input class="inp" id="ma" placeholder="ex: Jul, Ninho, Booba…" autocomplete="off" spellcheck="false"/>
+      </div>
+      <div id="sp-preview" style="display:none;margin-bottom:20px"></div>`;
+    const btn=document.createElement('button');btn.className='btn btn-primary';btn.textContent='Valider →';btn.disabled=true;
+    w.appendChild(btn);
+
+    let debounceT=null;
+    const artistInp=w.querySelector('#ma');
+    const spPrev=w.querySelector('#sp-preview');
+
+    artistInp.addEventListener('input',()=>{
+      const v=artistInp.value.trim();
+      btn.disabled=!v;
+      clearTimeout(debounceT);
+      if(v.length<2){spPrev.style.display='none';return}
+      debounceT=setTimeout(()=>{
+        const embed=buildSpotifyEmbed(v,false);
+        if(embed){
+          spPrev.style.display='block';
+          spPrev.innerHTML=`<div class="label-sm" style="margin-bottom:10px;color:var(--rose)">Aperçu — c'est lui ?</div>${embed}`;
+        } else {
+          spPrev.style.display='block';
+          spPrev.innerHTML=`<div class="card-rose" style="font-size:13px;color:var(--muted)">
+            Rappeur non trouvé dans la liste — il sera quand même enregistré.<br>
+            <a href="https://open.spotify.com/search/${encodeURIComponent(v)}" target="_blank" style="color:var(--rose)">Chercher sur Spotify →</a>
+          </div>`;
+        }
+      },500);
+    });
+
+    btn.onclick=()=>{
+      const artist=artistInp.value.trim();if(!artist)return;
+      S.saveAns(q.id,{artist});
+      showUnlock(w,q);
+    };
+  }
+
+  else if(q.type==='color'){
+    const pickerWrap=document.createElement('div');pickerWrap.className='mb16';
+    pickerWrap.innerHTML=`
+      <label class="label-sm" for="custom-color">Choisis ta couleur</label>
+      <input id="custom-color" type="color" value="#fce8ee" class="inp" style="height:52px;padding:8px;cursor:pointer"/>
+      <p class="hint" style="margin-top:8px">Tu peux choisir n'importe quelle couleur.</p>`;
+    const picker=pickerWrap.querySelector('#custom-color');
+    applyThemeFromColor(picker.value);
+    picker.addEventListener('input',()=>{applyThemeFromColor(picker.value)});
+
+    const btn=document.createElement('button');btn.className='btn btn-primary';btn.textContent='Valider cette couleur →';
+    btn.onclick=()=>{
+      const hex=picker.value;
+      const chosen={name:'Couleur personnalisee',hex};
+      S.saveAns(q.id,chosen);
+      S.setBg(hex);
+      applyThemeFromColor(hex);
+      showUnlock(w,q);
+    };
+    w.appendChild(pickerWrap);w.appendChild(btn);
+  }
+
+  el.appendChild(w);
+}
+
+function showUnlock(w,q){
+  const clue=CLUES.find(c=>c.id===q.cid);
+  let cluePreview='';
+  if(clue){
+    if(clue.type==='image'){
+      cluePreview=`<div style="border-top:1px solid rgba(201,83,106,.15);padding-top:18px">
+        <div class="eyebrow" style="margin-bottom:8px">Indice #${clue.id} débloqué !</div>
+        <p class="serif" style="font-size:15px;font-style:italic;color:var(--ink);margin-bottom:10px">« ${clue.text} »</p>
+        <p style="font-size:12px;color:var(--muted)">👉 Va dans la page <strong>Indices</strong> pour le voir et trouver le mot caché.</p>
+      </div>`;
+    } else {
+      cluePreview=`<div style="border-top:1px solid rgba(201,83,106,.15);padding-top:18px">
+        <div class="eyebrow" style="margin-bottom:8px">Indice #${clue.id} débloqué !</div>
+        <p class="serif" style="font-size:16px;font-style:italic;color:var(--ink)">« ${clue.text} »</p>
+      </div>`;
+    }
+  }
+  w.innerHTML=`
+    <div class="card-rose" style="animation:revealIn .5s cubic-bezier(.16,1,.3,1) both;text-align:center;padding:32px">
+      <div style="font-size:24px;margin-bottom:14px">✦</div>
+      <p class="serif" style="font-size:20px;font-style:italic;color:var(--rose-deep);margin-bottom:8px">Merci pour ta réponse</p>
+      <p class="hint mb20">Un indice vient d'être débloqué.</p>
+      ${cluePreview}
+    </div>`;
+  navActive('questions');
+}
+
+// ══════════════════════════════════════════════════════════════
+// INDICES
+// ══════════════════════════════════════════════════════════════
+function renderIndices(){
+  const d=S.load();
+
+  // Mini Spotify player dans la page indices
+  const zone2=document.getElementById('spotify-indices');
+  const musicAns=d.ans[7];
+  if(musicAns&&musicAns.artist){
+    const embed=buildSpotifyEmbed(musicAns.artist,true);
+    if(embed) zone2.innerHTML=embed;
+    else zone2.innerHTML='';
+  } else {
+    zone2.innerHTML='';
+  }
+
+  const list=document.getElementById('clist');list.innerHTML='';
+  const qByCid={};QS.forEach(q=>qByCid[q.cid]=q);
+  const clueTextHtml=(clue,fontSize,extraStyle='')=>{
+    const txt=(clue.text||'').trim();
+    if(!txt) return '';
+    return `<p class="serif" style="font-size:${fontSize};font-style:italic;color:var(--dash);line-height:1.5;${extraStyle}">« ${txt} »</p>`;
+  };
+
+  CLUES.forEach((clue,i)=>{
+    const q=qByCid[clue.id];
+    const unlocked=q&&d.ans[q.id]!==undefined;
+    const isVal=!!d.val[clue.id];
+    const tries=d.att[clue.id]||[];
+
+    const div=document.createElement('div');
+    div.style.cssText=`animation:fadeUp .4s cubic-bezier(.16,1,.3,1) ${i*.07}s both;margin-bottom:24px`;
+
+    if(!unlocked){
+      div.innerHTML=`<div class="card" style="opacity:.3;filter:blur(.5px)">
+        <div class="eyebrow-muted" style="margin-bottom:12px">Indice ${clue.id}</div>
+        <div style="height:80px;border-radius:3px;background:var(--warm);display:flex;align-items:center;justify-content:center">
+          <span style="font-size:24px;opacity:.4">${clue.type==='image'?'🖼':'?'}</span>
+        </div>
+        <p style="font-size:12px;color:var(--muted);margin-top:12px">Réponds à la question ${clue.id} pour débloquer…</p>
+      </div>`;
+      list.appendChild(div);return;
+    }
+
+    // Image clue — show image + word to guess below
+    if(clue.type==='image'){
+      div.innerHTML=`<div class="card" id="ccard-${clue.id}" style="border-color:${isVal?'rgba(201,83,106,.15)':'var(--border)'};background:${isVal?'var(--rose-light)':'white'};padding:24px">
+        <div class="flex fb fc mb16">
+          <div class="eyebrow-muted" style="margin:0">Indice ${clue.id}</div>
+          ${isVal?'<span class="tag tag-green">✓ Trouvé !</span>':'<span class="tag tag-rose">À deviner</span>'}
+        </div>
+        ${clueTextHtml(clue,'17px','margin-bottom:16px')}
+        <div class="clue-img-wrap">
+          <img src="${clue.img}" alt="indice ${clue.id}"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+            loading="lazy" style="width:100%;max-height:280px;object-fit:contain;border-radius:4px;display:block;background:var(--warm)"/>
+          <div class="clue-img-err" style="display:none">
+            <span style="font-size:28px;opacity:.4">🖼</span>
+            <span style="font-size:12px;color:var(--dash)">Image à venir…</span>
+          </div>
+        </div>
+        <div class="dash-row mb12" id="dashes-${clue.id}"></div>
+        ${!isVal?`<div class="flex g10" id="izone-${clue.id}">
+          <input class="inp" id="ci-${clue.id}" placeholder="Quel mot cette image te inspire ?"
+            style="flex:1;text-transform:uppercase;letter-spacing:.12em;font-size:13px"/>
+          <button class="btn btn-primary btn-sm" onclick="tryClue(${clue.id})">→</button>
+        </div>
+        ${tries.length?`<div style="margin-top:10px;font-size:11px;color:var(--dash)">Essayé : ${tries.map(t=>t.w).join(', ')}</div>`:''}`:``}
+      </div>`;
+    }
+
+    // Word clue — text hint + word to guess
+    else {
+      div.innerHTML=`<div class="card" id="ccard-${clue.id}" style="border-color:${isVal?'rgba(201,83,106,.15)':'var(--border)'};background:${isVal?'var(--rose-light)':'white'}">
+        <div class="flex fb fc mb16">
+          <div class="eyebrow-muted" style="margin:0">Indice ${clue.id}</div>
+          ${isVal?'<span class="tag tag-green">✓ Trouvé !</span>':'<span class="tag tag-rose">À deviner</span>'}
+        </div>
+        ${clueTextHtml(clue,'20px','line-height:1.6;margin-bottom:20px')}
+        <div class="dash-row mb16" id="dashes-${clue.id}"></div>
+        ${!isVal?`<div class="flex g10" id="izone-${clue.id}">
+          <input class="inp" id="ci-${clue.id}" placeholder="Ton mot…"
+            style="flex:1;text-transform:uppercase;letter-spacing:.12em;font-size:13px"/>
+          <button class="btn btn-primary btn-sm" onclick="tryClue(${clue.id})">→</button>
+        </div>
+        ${tries.length?`<div style="margin-top:10px;font-size:11px;color:var(--dash)">Essayé : ${tries.map(t=>t.w).join(', ')}</div>`:''}`:``}
+      </div>`;
+    }
+
+    list.appendChild(div);
+
+    // Dashes
+    const dr=document.getElementById(`dashes-${clue.id}`);
+    if(dr){
+      for(let j=0;j<clue.n;j++){
+        const da=document.createElement('div');da.className='dash'+(isVal?' found':'');
+        da.style.transitionDelay=isVal?`${j*35}ms`:'0ms';dr.appendChild(da);
+      }
+      const nl=document.createElement('span');nl.style.cssText='font-size:11px;color:var(--dash);margin-left:6px';
+      nl.textContent=clue.n+' lettres';dr.appendChild(nl);
+    }
+
+    if(!isVal){
+      const inp=document.getElementById(`ci-${clue.id}`);
+      if(inp) inp.addEventListener('keydown',e=>{if(e.key==='Enter')tryClue(clue.id)});
+    }
+  });
+
+  const allUnlocked=CLUES.every(clue=>{
+    const q=qByCid[clue.id];
+    return q&&d.ans[q.id]!==undefined;
+  });
+  if(allUnlocked){
+    const who=(d.who&&typeof d.who==='object')?d.who:{tries:[],found:false};
+    const tries=Array.isArray(who.tries)?who.tries:[];
+    const left=Math.max(0,WHO_AM_I_MAX_TRIES-tries.length);
+    const box=document.createElement('div');
+    box.className='card';
+    box.style.marginTop='12px';
+
+    if(who.found){
+      box.innerHTML=`<div class="eyebrow" style="margin-bottom:10px">Final</div>
+        <p class="serif" style="font-size:24px;font-style:italic;color:var(--rose-deep);margin-bottom:8px">${WHO_AM_I_PROMPT}</p>
+        <p style="font-size:13px;color:var(--muted)">✓ Bravo, tu as trouvé.</p>`;
+    } else if(left===0){
+      box.innerHTML=`<div class="eyebrow" style="margin-bottom:10px">Final</div>
+        <p class="serif" style="font-size:24px;font-style:italic;color:var(--rose-deep);margin-bottom:8px">${WHO_AM_I_PROMPT}</p>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:10px">Tu as utilisé tes ${WHO_AM_I_MAX_TRIES} tentatives.</p>
+        <p style="font-size:12px;color:var(--dash)">Essais: ${tries.join(', ')}</p>`;
+    } else {
+      box.innerHTML=`<div class="eyebrow" style="margin-bottom:10px">Final</div>
+        <p class="serif" style="font-size:24px;font-style:italic;color:var(--rose-deep);margin-bottom:8px">${WHO_AM_I_PROMPT}</p>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Tu as ${left} tentative${left>1?'s':''} restante${left>1?'s':''}.</p>
+        <div class="flex g10" id="who-zone">
+          <input class="inp" id="who-inp" placeholder="Ta réponse..." style="flex:1;text-transform:uppercase;letter-spacing:.1em;font-size:13px"/>
+          <button class="btn btn-primary btn-sm" onclick="tryWhoAmI()">→</button>
+        </div>
+        ${tries.length?`<div style="margin-top:10px;font-size:11px;color:var(--dash)">Essais: ${tries.join(', ')}</div>`:''}`;
+    }
+    list.appendChild(box);
+    const winp=document.getElementById('who-inp');
+    if(winp) winp.addEventListener('keydown',e=>{if(e.key==='Enter')tryWhoAmI()});
+  }
+}
+
+function normalizeGuess(v){
+  return (v||'').toString().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Z0-9]/g,'');
+}
+
+function tryWhoAmI(){
+  const inp=document.getElementById('who-inp');if(!inp)return;
+  const raw=inp.value.trim();if(!raw)return;
+  const d=S.load();
+  const who=(d.who&&typeof d.who==='object')?d.who:{tries:[],found:false};
+  const tries=Array.isArray(who.tries)?who.tries:[];
+  if(who.found||tries.length>=WHO_AM_I_MAX_TRIES) return;
+
+  const guess=normalizeGuess(raw);
+  const ok=WHO_AM_I_ANSWERS.some(a=>normalizeGuess(a)===guess);
+  S.addWhoTry(raw.toUpperCase());
+  if(ok) S.setWhoFound();
+  renderIndices();
+}
+
+function tryClue(cid){
+  const inp=document.getElementById(`ci-${cid}`);if(!inp)return;
+  const val=inp.value.trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  if(!val)return;
+  const clue=CLUES.find(c=>c.id===cid);if(!clue)return;
+  // Normalize expected word too
+  const expected=clue.word.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  S.addAtt(cid,val);
+  if(val===expected){
+    S.valid(cid);
+    document.querySelectorAll(`#dashes-${cid} .dash`).forEach((da,i)=>setTimeout(()=>da.classList.add('found'),i*35));
+    const zone=document.getElementById(`izone-${cid}`);
+    setTimeout(()=>{
+      if(zone) zone.innerHTML='<span class="tag tag-green" style="animation:popIn .4s cubic-bezier(.16,1,.3,1) both;display:inline-block;margin-top:8px">✓ Trouvé !</span>';
+      const cc=document.getElementById(`ccard-${cid}`);
+      if(cc){cc.style.borderColor='rgba(35,107,62,.2)';cc.style.background='#f0f9f4'}
+      // All done?
+      const d=S.load();
+      if(CLUES.every(c=>d.val[c.id])) setTimeout(()=>goPage('home'),800);
+    },600);
+  } else {
+    inp.style.animation='shake .3s ease';inp.style.borderColor='var(--rose)';
+    setTimeout(()=>{inp.value='';inp.style.animation='';inp.style.borderColor=''},480);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// RÈGLES
+// ══════════════════════════════════════════════════════════════
+function renderRules(){
+  document.getElementById('rcontent').innerHTML=[
+    ['01','Tu peux demander à n\'importe qui de t\'aider pour trouver les mots cachés des indices'],
+    ['02','Tu n\'as pas le droit de demander à n\'importe quel ICY des indices sur qui je suis'],
+    ['03','Interdit d\'aller voir quelqu\'un que tu soupconnes'],
+  ].map(([n,t,p])=>`<div class="flex g24 mb36"><div class="serif" style="font-size:28px;font-weight:300;color:var(--rose);opacity:.5;min-width:36px;line-height:1">${n}</div><div><h3 class="serif" style="font-size:19px;font-weight:400;color:var(--ink);margin-bottom:8px">${t}</h3>${p?`<p style="font-size:14px;color:var(--muted);line-height:1.85">${p}</p>`:''}</div></div>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+// ADMIN HOME   
+// ══════════════════════════════════════════════════════════════
+function adminResetSite(){
+  if(role!=='admin') return;
+  const ok=window.confirm('Confirmer le reset ? Cela effacera les reponses, tentatives, mots trouves et couleur sauvegardee cote utilisateur.');
+  if(!ok) return;
+  try{localStorage.removeItem('pt5')}catch{}
+  curQ=0;
+  resetTheme();
+  goPage('admin-home');
+  alert('Memoire utilisateur effacee.');
+}
+
+function renderAdminHome(){
+  const d=S.load();
+  const ans=Object.keys(d.ans).length;
+  const wordVal=CLUES.filter(c=>d.val[c.id]).length;
+  const att=Object.values(d.att).flat().length;
+  document.getElementById('astats').innerHTML=[
+    {n:ans,t:QS.length,l:'Questions répondues'},
+    {n:wordVal,t:CLUES.length,l:'Mots trouvés'},
+    {n:att,t:null,l:'Tentatives au total'},
+  ].map(s=>`<div class="stat-card"><div class="stat-n">${s.n}${s.t?`<sub>/${s.t}`:''}</sub></div><div class="stat-label">${s.l}</div></div>`).join('');
+  document.getElementById('aqlist').innerHTML=
+    `<div class="label-sm" style="margin-bottom:16px">État des questions</div>`+
+    QS.map(q=>{const a=d.ans[q.id]!==undefined;return`<div class="flex fb fc" style="padding:13px 0;border-bottom:1px solid var(--border)"><div class="flex fc g12"><div style="width:6px;height:6px;border-radius:50%;background:${a?'var(--rose)':'var(--border)'};flex-shrink:0"></div><p style="font-size:13px;color:var(--ink)">${q.text}</p></div>${a?'<span class="tag tag-green">Répondue</span>':'<span class="tag tag-gray">En attente</span>'}</div>`}).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+// ADMIN RÉPONSES
+// ══════════════════════════════════════════════════════════════
+function renderAdminAnswers(){
+  const d=S.load();
+  document.getElementById('aanswers').innerHTML=QS.map(q=>{
+    const a=d.ans[q.id];const done=a!==undefined;
+    let prev='<p class="hint">En attente de sa réponse…</p>';
+    if(done){
+      if(q.type==='music'){
+        const id=a.artist?getSpotifyId(a.artist):null;
+        const embed=id?buildSpotifyEmbed(a.artist,true):'';
+        prev=`<div class="answer-bar">
+          <p style="font-size:14px;font-weight:500;color:var(--ink);margin-bottom:${embed?12:0}px">Rappeur : ${a.artist}</p>
+          ${embed}
+        </div>`;
+      }
+      else if(q.type==='choice') prev=`<div class="answer-bar"><p style="font-size:15px;color:var(--ink)">${a}</p></div>`;
+      else if(q.type==='color'){
+        const colorHex=(a&&typeof a==='object'&&a.hex)?a.hex:(typeof a==='string'?a:'#fce8ee');
+        const colorName=(a&&typeof a==='object'&&a.name)?a.name:'Couleur choisie';
+        prev=`<div class="answer-bar flex fc g12"><div style="width:28px;height:28px;border-radius:50%;background:${colorHex};border:2px solid rgba(0,0,0,.1)"></div><p style="font-size:14px;color:var(--ink)">${colorName} <span style="color:var(--muted);font-size:12px">(${colorHex})</span></p></div>`;
+      }
+      else prev=`<div class="answer-bar"><p style="font-size:14px;color:var(--ink);line-height:1.85">${a}</p></div>`;
+    }
+    return`<div class="card mb24"><div class="flex fb fc mb16"><div class="eyebrow-muted" style="margin:0">Q${q.id} · <em style="text-transform:none;letter-spacing:0">${q.type}</em></div>${done?'<span class="tag tag-green">Répondue</span>':'<span class="tag tag-gray">En attente</span>'}</div><p class="serif" style="font-size:19px;font-style:italic;color:var(--ink);margin-bottom:18px">${q.text}</p>${prev}</div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+// ADMIN INDICES
+// ══════════════════════════════════════════════════════════════
+function renderAdminClues(){
+  const d=S.load();
+  const qByCid={};QS.forEach(q=>qByCid[q.cid]=q);
+  document.getElementById('aclues').innerHTML=CLUES.map(clue=>{
+    const q=qByCid[clue.id];const unlocked=q&&d.ans[q.id]!==undefined;
+    const isVal=!!d.val[clue.id];const tries=d.att[clue.id]||[];
+    const typeLabel=clue.type==='image'?'🖼 image + mot':'🔤 mot';
+    return`<div class="card mb20" style="border-color:${isVal?'rgba(35,107,62,.2)':'var(--border)'};background:${isVal?'#f0f9f4':'white'}">
+      <div class="flex fb fc mb12">
+        <div>
+          <div class="eyebrow-muted" style="margin-bottom:4px">Indice ${clue.id} · ${clue.label} · ${typeLabel}</div>
+          <p style="font-size:13px;color:var(--ink)">Mot à deviner : <strong style="letter-spacing:.1em;color:var(--rose-deep)">${clue.word}</strong></p>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
+          ${!unlocked?'<span class="tag tag-gray">Verrouillé</span>':''}
+          ${unlocked&&!isVal?'<span class="tag tag-rose">En cours</span>':''}
+          ${isVal?'<span class="tag tag-green">✓ Trouvé !</span>':''}
+        </div>
+      </div>
+      ${clue.type==='image'&&unlocked?`<img src="${clue.img}" style="width:100%;max-height:100px;object-fit:contain;border-radius:3px;margin-bottom:12px;background:var(--warm)" alt="${clue.label}"/>`:''}
+      ${(clue.text||'').trim()?`<p class="hint mb12">« ${clue.text.trim()} »</p>`:''}
+      ${tries.length?`<div class="label-sm" style="margin-bottom:8px">Tentatives (${tries.length})</div><div class="flex g8 fwrap">${tries.map(t=>`<span class="tag" style="background:${t.w===clue.word?'#e6f5ec':'var(--warm)'};color:${t.w===clue.word?'#236b3e':'var(--muted)'};letter-spacing:.1em">${t.w}${t.w===clue.word?' ✓':''}</span>`).join('')}</div>`:`<p class="hint">${unlocked?'Aucune tentative encore…':'Indice pas encore débloqué.'}</p>`}
+    </div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
