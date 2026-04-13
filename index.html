@@ -59,10 +59,6 @@ h2.big{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:300;lin
 /* SPOTIFY PLAYER */
 #spotify-wrap{margin-bottom:32px;animation:fadeUp .6s cubic-bezier(.16,1,.3,1) both}
 #spotify-wrap iframe{border-radius:12px;border:none}
-.spotify-frame-wrap{position:relative;border-radius:12px;overflow:hidden;isolation:isolate}
-.spotify-frame-wrap iframe{display:block;position:relative;z-index:1}
-.spotify-frame-overlay{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:flex-end;padding:10px;z-index:3;pointer-events:none}
-.spotify-frame-badge{background:rgba(0,0,0,.72);color:#fff;padding:6px 10px;border-radius:999px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;line-height:1}
 .spotify-hint{font-size:11px;color:var(--muted);text-align:center;margin-top:8px;letter-spacing:.06em}
 .no-music-hint{background:var(--warm);border-radius:3px;padding:16px 20px;font-size:13px;color:var(--muted);font-style:italic;text-align:center;margin-bottom:32px}
 
@@ -295,10 +291,6 @@ window.EMAIL_NOTIF_CONFIG = {
   templateId: 'template_ls43yk9'
 };
 
-// Optionnel: ne pas exposer ces valeurs en production publique.
-window.SPOTIFY_CLIENT_ID = '2817397c3a8f4618ae3dfc4f0bdab442';
-window.SPOTIFY_CLIENT_SECRET = '5d54067ae33244e4bcaa7baf3d5e4144';
-
 const USERS = { anna:{pass:'lpb',role:'user'}, moi:{pass:'juju2020',role:'admin'} };
 
 // CLUES — type:'image' = photo + mot à deviner / type:'word' = texte + mot à deviner
@@ -407,7 +399,6 @@ const VERIFIED_SPOTIFY_IDS = {
   "sneazzy": "1cA379ILgR07m7XQVXyP6Q",
   "verino": "6gSFOF0IZVbxDt2noqOvH1",
   "franglish": "4uJNQGa3L2frXDxwgouTIw",
-  "bavaglio": null,
   "damage": "5XmMRdMQn7LLmjx3ZC4wq0",
   "alpha wann": "7yeFMUrYTY5cAZx0GKXnti",
   "le moula": "0FShd0NBiGp1bgvGoUQN7g",
@@ -416,12 +407,9 @@ const VERIFIED_SPOTIFY_IDS = {
   "leto": "6HCBnyTBSLdb3TFn2ayulY",
   "dinos": "1QPdp5duV6lV4XINCzjwQ2",
   "caballero": "5DE0by3fZT0nrlJSutY2D7",
-  "jesianowski": null,
   "jeremstar": "5QZLTMRIyH5IOVHEjHH40J",
-  "elh kebir": null,
   "maes": "6L34dW6SKMSDaGIfYDU19j",
   "vald": "3CnCGFxXbOA8bAK54jR8js",
-
 };
 
 
@@ -928,136 +916,31 @@ initEmailNotifications();
 // ══════════════════════════════════════════════════════════════
 // SPOTIFY HELPERS
 // ══════════════════════════════════════════════════════════════
-const SPOTIFY_ID_CACHE={};
-let SPOTIFY_TOKEN_CACHE={token:null,expiresAt:0};
-
-function getCachedSpotifyId(artistName){
-  const key=normalizeArtistKey(artistName);
-  if(!key) return null;
-  if(SPOTIFY_ID_CACHE[key]) return SPOTIFY_ID_CACHE[key];
-
-  // Fallback immédiat sur la liste locale existante.
-  if(VERIFIED_SPOTIFY_IDS&&typeof VERIFIED_SPOTIFY_IDS==='object'){
-    if(VERIFIED_SPOTIFY_IDS[key]) return VERIFIED_SPOTIFY_IDS[key];
-    for(const [name,id] of Object.entries(VERIFIED_SPOTIFY_IDS)){
-      const nk=normalizeArtistKey(name);
-      if(!nk) continue;
-      if(key===nk||key.includes(nk)||nk.includes(key)) return id;
-    }
+function getSpotifyId(artistName){
+  const key=artistName.trim().toLowerCase();
+  // Direct match (uniquement IDs verifies)
+  if(VERIFIED_SPOTIFY_IDS[key]) return VERIFIED_SPOTIFY_IDS[key];
+  // Partial match
+  for(const k of Object.keys(VERIFIED_SPOTIFY_IDS)){
+    if(key.includes(k)||k.includes(key)) return VERIFIED_SPOTIFY_IDS[k];
   }
   return null;
-}
-
-function setCachedSpotifyId(artistName,id){
-  const key=normalizeArtistKey(artistName);
-  if(!key||!id) return;
-  SPOTIFY_ID_CACHE[key]=id;
-}
-
-async function fetchSpotifyArtistId(artistName){
-  const clean=(artistName||'').toString().trim();
-  if(!clean) return null;
-
-  const cached=getCachedSpotifyId(clean);
-  if(cached) return cached;
-
-  try{
-    const token=await getSpotifyAccessToken();
-    if(!token) return null;
-    const params=new URLSearchParams({
-      q:`artist:${clean}`,
-      type:'artist',
-      limit:'5',
-      market:'FR',
-    });
-    const url=`https://api.spotify.com/v1/search?${params.toString()}`;
-    const res=await fetch(url,{method:'GET',headers:{Authorization:`Bearer ${token}`}});
-    if(!res.ok) return null;
-    const obj=await res.json();
-    const items=((obj||{}).artists||{}).items||[];
-    const id=items[0]&&items[0].id?String(items[0].id).trim():'';
-    if(!id) return null;
-    setCachedSpotifyId(clean,id);
-    return id;
-  }catch{
-    return null;
-  }
-}
-
-async function getSpotifyAccessToken(){
-  const now=Date.now();
-  if(SPOTIFY_TOKEN_CACHE.token && SPOTIFY_TOKEN_CACHE.expiresAt>now+10000){
-    return SPOTIFY_TOKEN_CACHE.token;
-  }
-
-  const cid=(window.SPOTIFY_CLIENT_ID||'').toString().trim();
-  const csec=(window.SPOTIFY_CLIENT_SECRET||'').toString().trim();
-
-  if(cid&&csec){
-    try{
-      const basic=btoa(`${cid}:${csec}`);
-      const body=new URLSearchParams({grant_type:'client_credentials'});
-      const res=await fetch('https://accounts.spotify.com/api/token',{
-        method:'POST',
-        headers:{
-          Authorization:`Basic ${basic}`,
-          'Content-Type':'application/x-www-form-urlencoded',
-        },
-        body,
-      });
-      if(res.ok){
-        const obj=await res.json();
-        if(obj&&obj.access_token){
-          const ttl=(Number(obj.expires_in)||3600)*1000;
-          SPOTIFY_TOKEN_CACHE={token:obj.access_token,expiresAt:Date.now()+ttl};
-          return obj.access_token;
-        }
-      }
-    }catch{}
-  }
-
-  try{
-    const res=await fetch('https://open.spotify.com/get_access_token?reason=transport&productType=web_player');
-    if(!res.ok) return null;
-    const obj=await res.json();
-    const token=obj&&obj.accessToken?obj.accessToken:'';
-    const exp=obj&&obj.accessTokenExpirationTimestampMs?Number(obj.accessTokenExpirationTimestampMs):Date.now()+3600000;
-    if(!token) return null;
-    SPOTIFY_TOKEN_CACHE={token,expiresAt:exp};
-    return token;
-  }catch{
-    return null;
-  }
-}
-
-async function upgradeSpotifyEmbed(artistName,iframeEl,compact=false){
-  if(!iframeEl) return;
-  const id=await fetchSpotifyArtistId(artistName);
-  if(!id) return;
-  const nextSrc=`https://open.spotify.com/embed/artist/${id}`;
-  if(iframeEl.src!==nextSrc){
-    iframeEl.src=nextSrc;
-    if(compact) iframeEl.style.borderRadius='8px';
-  }
 }
 
 function buildSpotifyEmbed(artistName, compact=false){
   const clean=(artistName||'').toString().trim();
   if(!clean) return null;
-  const id=getCachedSpotifyId(clean);
+  const id=getSpotifyId(clean);
   // compact = petit player pour page indices, sinon grand player accueil
   const h=compact?80:152;
   const src=id
     ?`https://open.spotify.com/embed/artist/${id}`
     :`https://open.spotify.com/embed/search/${encodeURIComponent(clean)}`;
-  return `<div class="spotify-frame-wrap">
-    <iframe
-      src="${src}"
-      width="100%" height="${h}" frameborder="0"
-      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-      loading="eager" style="border-radius:${compact?8:12}px"></iframe>
-    <div class="spotify-frame-overlay"><span class="spotify-frame-badge">Spotify</span></div>
-  </div>`;
+  return `<iframe
+    src="${src}"
+    width="100%" height="${h}" frameborder="0"
+    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+    loading="eager" style="border-radius:${compact?8:12}px"></iframe>`;
 }
 
 function injectSpotify(artistName){
@@ -1071,8 +954,6 @@ function injectSpotify(artistName){
         ${embed}
         <p class="spotify-hint">Clique sur une musique pour l'écouter</p>
       </div>`;
-      const iframe=zone.querySelector('iframe');
-      upgradeSpotifyEmbed(artistName,iframe,false);
     } else {
       // Fallback ultime: lien Spotify search
       const q=encodeURIComponent(artistName);
@@ -1089,8 +970,6 @@ function injectSpotify(artistName){
     const embed=buildSpotifyEmbed(artistName,true);
     if(embed){
       zone2.innerHTML=`<div style="opacity:.85">${embed}</div>`;
-      const iframe=zone2.querySelector('iframe');
-      upgradeSpotifyEmbed(artistName,iframe,true);
     }
   }
 }
@@ -1370,12 +1249,10 @@ function buildForm(el,q){
         if(embed){
           spPrev.style.display='block';
           spPrev.innerHTML=`<div class="label-sm" style="margin-bottom:10px;color:var(--rose)">Aperçu — c'est lui ?</div>${embed}`;
-          const iframe=spPrev.querySelector('iframe');
-          upgradeSpotifyEmbed(v,iframe,false);
         } else {
           spPrev.style.display='block';
           spPrev.innerHTML=`<div class="card-rose" style="font-size:13px;color:var(--muted)">
-            Artiste non trouvé automatiquement — il sera quand même enregistré.<br>
+            Rappeur non trouvé dans la liste — il sera quand même enregistré.<br>
             <a href="https://open.spotify.com/search/${encodeURIComponent(v)}" target="_blank" style="color:var(--rose)">Chercher sur Spotify →</a>
           </div>`;
         }
@@ -1708,7 +1585,7 @@ function renderAdminAnswers(){
     let prev='<p class="hint">En attente de sa réponse…</p>';
     if(done){
       if(q.type==='music'){
-        const id=a.artist?getCachedSpotifyId(a.artist):null;
+        const id=a.artist?getSpotifyId(a.artist):null;
         const embed=id?buildSpotifyEmbed(a.artist,true):'';
         prev=`<div class="answer-bar">
           <p style="font-size:14px;font-weight:500;color:var(--ink);margin-bottom:${embed?12:0}px">Rappeur : ${a.artist}</p>
