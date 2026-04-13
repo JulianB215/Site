@@ -260,6 +260,7 @@ textarea.inp{resize:vertical;font-family:'Cormorant Garamond',serif;font-size:17
 
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
 
 window.SITE_SYNC_CONFIG = {
@@ -274,6 +275,21 @@ window.SITE_SYNC_CONFIG = {
     measurementId: "G-5960XBWLH4"
   },
   dbPath: "pour-anna/prod"
+};
+
+// Configure this if you want an email notification each time a question is answered.
+// Example:
+// window.EMAIL_NOTIF_CONFIG = {
+//   publicKey: 'your_emailjs_public_key',
+//   serviceId: 'your_emailjs_service_id',
+//   templateId: 'your_emailjs_template_id',
+//   enabled: true
+// };
+window.EMAIL_NOTIF_CONFIG = {
+  enabled: true,
+  publicKey: 'CwevrIYdLMe8ybyNA',
+  serviceId: 'service_oxwyn7x',
+  templateId: 'template_ls43yk9'
 };
 
 const USERS = { anna:{pass:'lpb',role:'user'}, moi:{pass:'juju2020',role:'admin'} };
@@ -358,69 +374,7 @@ const WHO_AM_I_ANSWERS = ['JULIAN BREUILLER','BREUILLER JULIAN','JULIAN','JUL'];
 const WHO_AM_I_MAX_TRIES = 3;
 const QUESTION_DELAY_MS = 60*60*1000;
 
-const COLORS = [
-  {name:'Rose poudré',hex:'#fce8ee',text:'#6b2d3e'},{name:'Lavande',hex:'#ede8f9',text:'#4a3575'},
-  {name:'Bleu ciel',hex:'#e5f0fb',text:'#1e4d82'},{name:'Menthe',hex:'#e4f5ed',text:'#1a5c3a'},
-  {name:'Pêche',hex:'#fde8d8',text:'#7a3318'},{name:'Lilas',hex:'#f3e8f9',text:'#5c2a7a'},
-  {name:'Jaune miel',hex:'#fdf3d8',text:'#6b4a0e'},{name:'Corail',hex:'#fde8e4',text:'#7a2a1e'},
-];
-
-// Mapping rappeur → Spotify artist ID
-// Les plus connus sont pré-mappés. Si son rappeur n'est pas ici,
-// Spotify Search API sera utilisée comme fallback (résultat en lien)
-const SPOTIFY_IDS = {
-  'jul':           '3IW7ScrzXmPvZhB27hmfgy',
-  'ninho':         '3yDIp0qBDIANIE3MZeQFDt',
-  'booba':         '5SXKhUBBEYeEEFLZhVU0P6',
-  'sch':           '6obXQbvvk5m5qLiQa8JV8v',
-  'damso':         '5dHt1vcEm9qb8fCyLcB3HL',
-  'nekfeu':        '74whJHfnaeA5HKXqQ3t9VR',
-  'niska':         '2QhIaHFWHetxwdX3YUJfVJ',
-  'lacrim':        '2bZTppxkJpU6OMl4MQFxE8',
-  'hamza':         '5ZtaOdQkHILMECMRvmMuft',
-  'freeze corleone':'5ZZkBr9PrRFbRMZ2IjH6v2',
-  'lil durk':      '3hcs9uc56yIGFCSy9leWe7',
-  'drake':         '3TVXtAsR1Inumwj472S9r4',
-  'lil baby':      '5f7VJjfbwm532GiveGC0ZK',
-  'central cee':   '4oLeXFyACqeem2VImYeBFe',
-  'gazo':          '5l4AvE0bRmBHxEGlDvIFyb',
-  'diddy':         '5gNMSFkfhOxMROww0VCPEH',
-  'tiakola':       '61gHgUlYMFyqiHFkCWMXH9',
-  'werenoi':       '3gNwRTXVkBobWO3TbC2JQz',
-  'naps':          '1yxj0qqQCuJQVxH3pxBf77',
-  'tayc':          '0hRQr5YHNfWMVULBd0fDTU',
-  'abou debeing':  '36rLpFbOJqKc8ItAQSzZmX',
-  'lefa':          '5cT6TJvlqIwGKB7VHRv8aF',
-  'koba lad':      '0GaRWDECJ4pIgOtUPQgF24',
-  'maes':          '7nrOHm97W3UpgGWOuJXWH6',
-  'soolking':      '37FLR6JFiaqe3yFFFG39Hb',
-  'alonzo':        '5kxFXxJPGFoiRGeMzdKJml',
-  'lartiste':      '1qBuVSC5tXLw7gfasDAZRV',
-  'gradur':        '3rEgjkPSoMv0WfO6TjBkNx',
-  'kaaris':        '2KpHMRCtHfGzjJuPoUCsBz',
-  'rohff':         '7w2l3bXpqn4dPKhyFKQHK7',
-  'vald':          '1rExrV7xXGIFsR3KKiMKGp',
-  'dinos':         '2eadUEkQVbhxiG9xREVxuS',
-  'lomepal':       '6HqVrHmqEt3vEMhECy8mvJ',
-  'orelsan':       '1pvGHD8bMONBLGP6fW9jEg',
-  'bigflo et oli': '3uR1GPEH7P8ynMGKKVmMkJ',
-  'soprano':       '5qJThRRxT8N9R5wl5D4xly',
-  'sinik':         '1Cf8AJXBVF0aLNkQXSJKrp',
-  'sexion d\'assaut':'1gBUSTR3olvz6VUSBiZ6z3',
-  'mafia k-1 fry': '5lMMSmSMfD9vP0XT7M5MSi',
-  'the game':      '0du5cEVh5yTK9QJze8zA0C',
-  'kendrick lamar':'2YZyLoL8N0Wb9xBt1NhZWg',
-  'tyler the creator':'4V8LLVI79E6jOaaTmH2ZIb',
-  'j cole':        '6l3HvQ5sa6mXTsMTB19rO5',
-  'future':        '1RyvyyTE3xzB2ZywiAwp0i',
-  'lil uzi vert':  '0Y5tJX1MQlPlqiwlOH1tJY',
-  'travis scott':  '0Y5tJX1MQlPlqiwlOH1tJY',
-  'post malone':   '246dkjvS1zLTtiykXe5h60',
-  'bad bunny':     '4q3ewBCX7sLwd24euuV69X',
-  'eminem':        '7dGJo4pcD2V6oG8kP0tJRR',
-};
-
-// IDs verifies manuellement. Le reste passe en embed de recherche pour eviter les mauvais artistes.
+// IDs verifies manuellement. Le reste passe en embed de recherche.
 const VERIFIED_SPOTIFY_IDS = {
   'jul': '3IW7ScrzXmPvZhB27hmfgy',
 };
@@ -673,6 +627,48 @@ function defaultStoreState(){
   };
 }
 
+function summarizeAnswer(v){
+  if(v===undefined||v===null) return '';
+  if(typeof v==='string') return v;
+  if(typeof v==='object'){
+    if(typeof v.artist==='string') return v.artist;
+    if(typeof v.name==='string'&&typeof v.hex==='string') return `${v.name} (${v.hex})`;
+    try{return JSON.stringify(v);}catch{return String(v);}
+  }
+  return String(v);
+}
+
+function initEmailNotifications(){
+  const cfg=window.EMAIL_NOTIF_CONFIG||{};
+  if(!cfg.enabled) return false;
+  if(!(window.emailjs&&emailjs.init)) return false;
+  try{
+    emailjs.init({ publicKey: cfg.publicKey });
+    return true;
+  }catch{
+    return false;
+  }
+}
+
+function sendAnswerEmail(questionId, answerValue){
+  const cfg=window.EMAIL_NOTIF_CONFIG||{};
+  if(!cfg.enabled||!cfg.serviceId||!cfg.templateId||!cfg.publicKey) return;
+  if(!(window.emailjs&&emailjs.send)) return;
+
+  const question=QS.find(q=>q.id===questionId);
+  const answerText=summarizeAnswer(answerValue);
+  const payload={
+    question_id:String(questionId),
+    question_text:question?question.text:`Question ${questionId}`,
+    answer_text:answerText,
+    answer_kind:question?question.type:'unknown',
+    site_title:'Pour Anna',
+    sent_at:new Date().toLocaleString('fr-FR'),
+  };
+
+  emailjs.send(cfg.serviceId,cfg.templateId,payload).catch(()=>{});
+}
+
 const CLIENT_ID=(function(){
   try{
     const key='pt5_client';
@@ -692,7 +688,6 @@ const SYNC={
   ready:false,
   pushTimer:null,
   applyingRemote:false,
-  pendingRender:false,
 };
 
 function normalizeState(raw){
@@ -823,7 +818,16 @@ const S = {
     try{localStorage.setItem('pt5',JSON.stringify(next));}catch{}
     scheduleRemotePush(next);
   },
-  saveAns(id,v){const d=this.load();d.ans[id]=v;d.ansAt[id]=new Date().toISOString();this.save(d)},
+  saveAns(id,v){
+    const d=this.load();
+    const isNewAnswer=d.ans[id]===undefined;
+    d.ans[id]=v;
+    d.ansAt[id]=new Date().toISOString();
+    this.save(d);
+    if(isNewAnswer){
+      sendAnswerEmail(id,v);
+    }
+  },
   addAtt(cid,w){const d=this.load();d.att[cid]=d.att[cid]||[];d.att[cid].push({w,date:new Date().toISOString()});this.save(d)},
   valid(cid){const d=this.load();d.val[cid]=true;this.save(d)},
   setBg(hex){const d=this.load();d.bg=hex;this.save(d)},
@@ -861,6 +865,7 @@ let role=null, curQ=0;
 // ══════════════════════════════════════════════════════════════
 renderParticles();
 initRemoteSync();
+initEmailNotifications();
 
 // ══════════════════════════════════════════════════════════════
 // SPOTIFY HELPERS
