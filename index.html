@@ -260,7 +260,6 @@ textarea.inp{resize:vertical;font-family:'Cormorant Garamond',serif;font-size:17
 
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
 
 window.SITE_SYNC_CONFIG = {
@@ -640,33 +639,41 @@ function summarizeAnswer(v){
 
 function initEmailNotifications(){
   const cfg=window.EMAIL_NOTIF_CONFIG||{};
-  if(!cfg.enabled) return false;
-  if(!(window.emailjs&&emailjs.init)) return false;
-  try{
-    emailjs.init({ publicKey: cfg.publicKey });
-    return true;
-  }catch{
-    return false;
-  }
+  return !!(cfg.enabled && cfg.publicKey && cfg.serviceId && cfg.templateId);
 }
 
 function sendAnswerEmail(questionId, answerValue){
   const cfg=window.EMAIL_NOTIF_CONFIG||{};
   if(!cfg.enabled||!cfg.serviceId||!cfg.templateId||!cfg.publicKey) return;
-  if(!(window.emailjs&&emailjs.send)) return;
 
   const question=QS.find(q=>q.id===questionId);
   const answerText=summarizeAnswer(answerValue);
   const payload={
-    question_id:String(questionId),
-    question_text:question?question.text:`Question ${questionId}`,
-    answer_text:answerText,
-    answer_kind:question?question.type:'unknown',
-    site_title:'Pour Anna',
-    sent_at:new Date().toLocaleString('fr-FR'),
+    service_id:cfg.serviceId,
+    template_id:cfg.templateId,
+    user_id:cfg.publicKey,
+    template_params:{
+      question_id:String(questionId),
+      question_text:question?question.text:`Question ${questionId}`,
+      answer_text:answerText,
+      answer_kind:question?question.type:'unknown',
+      site_title:'Pour Anna',
+      sent_at:new Date().toLocaleString('fr-FR'),
+    }
   };
 
-  emailjs.send(cfg.serviceId,cfg.templateId,payload).catch(()=>{});
+  fetch('https://api.emailjs.com/api/v1.0/email/send',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload),
+  }).then(async res=>{
+    if(!res.ok){
+      const text=await res.text().catch(()=> '');
+      console.error('EmailJS send failed',res.status,text);
+    }
+  }).catch(err=>{
+    console.error('EmailJS network error',err);
+  });
 }
 
 const CLIENT_ID=(function(){
