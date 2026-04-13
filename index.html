@@ -59,8 +59,10 @@ h2.big{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:300;lin
 /* SPOTIFY PLAYER */
 #spotify-wrap{margin-bottom:32px;animation:fadeUp .6s cubic-bezier(.16,1,.3,1) both}
 #spotify-wrap iframe{border-radius:12px;border:none}
-.spotify-frame-wrap{position:relative;border-radius:12px;overflow:hidden}
-.spotify-frame-overlay{position:absolute;right:10px;bottom:10px;background:rgba(0,0,0,.72);color:#fff;padding:6px 10px;border-radius:999px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;pointer-events:none}
+.spotify-frame-wrap{position:relative;border-radius:12px;overflow:hidden;isolation:isolate}
+.spotify-frame-wrap iframe{display:block;position:relative;z-index:1}
+.spotify-frame-overlay{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:flex-end;padding:10px;z-index:3;pointer-events:none}
+.spotify-frame-badge{background:rgba(0,0,0,.72);color:#fff;padding:6px 10px;border-radius:999px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;line-height:1}
 .spotify-hint{font-size:11px;color:var(--muted);text-align:center;margin-top:8px;letter-spacing:.06em}
 .no-music-hint{background:var(--warm);border-radius:3px;padding:16px 20px;font-size:13px;color:var(--muted);font-style:italic;text-align:center;margin-bottom:32px}
 
@@ -1054,7 +1056,7 @@ function buildSpotifyEmbed(artistName, compact=false){
       width="100%" height="${h}" frameborder="0"
       allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
       loading="eager" style="border-radius:${compact?8:12}px"></iframe>
-    <span class="spotify-frame-overlay">Spotify</span>
+    <div class="spotify-frame-overlay"><span class="spotify-frame-badge">Spotify</span></div>
   </div>`;
 }
 
