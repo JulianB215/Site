@@ -258,10 +258,31 @@ textarea.inp{resize:vertical;font-family:'Cormorant Garamond',serif;font-size:17
   </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
 <script>
 // ══════════════════════════════════════════════════════════════
 // DATA
 // ══════════════════════════════════════════════════════════════
+// Configure this object in production to enable multi-device sync.
+// Example:
+// window.SITE_SYNC_CONFIG = {
+//   firebaseConfig: { apiKey:'...', authDomain:'...', databaseURL:'...', projectId:'...', appId:'...' },
+//   dbPath: 'pour-anna/prod'
+// };
+window.SITE_SYNC_CONFIG = {
+  firebaseConfig: {
+    apiKey: "AIzaSyDd9wI2bO0DkDhcC9jYekk-lAoltjNiwiI",
+    authDomain: "unjeupouranna.firebaseapp.com",
+    projectId: "unjeupouranna",
+    storageBucket: "unjeupouranna.firebasestorage.app",
+    messagingSenderId: "80355211018",
+    appId: "1:80355211018:web:f6f254792705880e51acf3",
+    measurementId: "G-5960XBWLH4"
+  },
+  dbPath: "pour-anna/prod"
+};
+
 const USERS = { anna:{pass:'lpb',role:'user'}, moi:{pass:'juju2020',role:'admin'} };
 
 // CLUES — type:'image' = photo + mot à deviner / type:'word' = texte + mot à deviner
@@ -641,21 +662,135 @@ function applySeriesTheme(seriesName){
   if(logo) logo.textContent=`✦ pour anna · ${theme.label}`;
 }
 
+function defaultStoreState(){
+  return {
+    ans:{},
+    ansAt:{},
+    att:{},
+    val:{},
+    bg:null,
+    timerEnabled:true,
+    who:{tries:[],found:false},
+    meta:{updatedAt:0,lastWriter:null}
+  };
+}
+
+const CLIENT_ID=(function(){
+  try{
+    const key='pt5_client';
+    let id=localStorage.getItem(key);
+    if(!id){
+      id='c_'+Math.random().toString(36).slice(2)+Date.now().toString(36);
+      localStorage.setItem(key,id);
+    }
+    return id;
+  }catch{return 'c_local';}
+})();
+
+const SYNC={
+  enabled:false,
+  dbRef:null,
+  booted:false,
+  pushTimer:null,
+  applyingRemote:false,
+  pendingRender:false,
+};
+
+function normalizeState(raw){
+  const d=raw&&typeof raw==='object'?raw:{};
+  d.ans=d.ans&&typeof d.ans==='object'?d.ans:{};
+  d.ansAt=d.ansAt&&typeof d.ansAt==='object'?d.ansAt:{};
+  d.att=d.att&&typeof d.att==='object'?d.att:{};
+  d.val=d.val&&typeof d.val==='object'?d.val:{};
+  d.bg=typeof d.bg==='string'?d.bg:null;
+  d.timerEnabled=d.timerEnabled!==false;
+  d.who=d.who&&typeof d.who==='object'?d.who:{tries:[],found:false};
+  d.who.tries=Array.isArray(d.who.tries)?d.who.tries:[];
+  d.who.found=!!d.who.found;
+  d.meta=d.meta&&typeof d.meta==='object'?d.meta:{};
+  d.meta.updatedAt=Number(d.meta.updatedAt)||0;
+  d.meta.lastWriter=typeof d.meta.lastWriter==='string'?d.meta.lastWriter:null;
+  return d;
+}
+
+function markStateMetadata(d){
+  d.meta=d.meta||{};
+  d.meta.updatedAt=Date.now();
+  d.meta.lastWriter=CLIENT_ID;
+  return d;
+}
+
+function activePageId(){
+  const p=document.querySelector('.page.active');
+  return p&&p.id?p.id.replace('page-',''):null;
+}
+
+function rerenderActivePage(){
+  if(role===null) return;
+  const d=S.load();
+  if(d.bg) applyThemeFromColor(d.bg);
+  else resetTheme();
+  buildNav();
+  const id=activePageId();
+  if(id) goPage(id);
+}
+
+function scheduleRemotePush(data){
+  if(!SYNC.enabled||!SYNC.dbRef||SYNC.applyingRemote) return;
+  clearTimeout(SYNC.pushTimer);
+  SYNC.pushTimer=setTimeout(()=>{
+    SYNC.dbRef.set(data).catch(()=>{});
+  },180);
+}
+
+function initRemoteSync(){
+  if(SYNC.booted) return;
+  SYNC.booted=true;
+  const cfg=window.SITE_SYNC_CONFIG;
+  if(!cfg||!cfg.firebaseConfig||!cfg.dbPath) return;
+  if(!(window.firebase&&firebase.initializeApp&&firebase.database)) return;
+  try{
+    const app=firebase.apps&&firebase.apps.length?firebase.app():firebase.initializeApp(cfg.firebaseConfig);
+    SYNC.dbRef=app.database().ref(cfg.dbPath);
+    SYNC.enabled=true;
+    SYNC.dbRef.on('value',snap=>{
+      const remote=normalizeState(snap.val());
+      const local=S.load();
+      const remoteTs=remote.meta&&remote.meta.updatedAt?remote.meta.updatedAt:0;
+      const localTs=local.meta&&local.meta.updatedAt?local.meta.updatedAt:0;
+      if(remoteTs===0) return;
+      if(remoteTs<=localTs&&remote.meta.lastWriter===local.meta.lastWriter) return;
+      SYNC.applyingRemote=true;
+      try{localStorage.setItem('pt5',JSON.stringify(remote));}catch{}
+      SYNC.applyingRemote=false;
+      rerenderActivePage();
+    });
+    const seeded=S.load();
+    if((seeded.meta&&seeded.meta.updatedAt)||Object.keys(seeded.ans||{}).length){
+      scheduleRemotePush(seeded);
+    }
+  }catch{
+    SYNC.enabled=false;
+    SYNC.dbRef=null;
+  }
+}
+
 // ══════════════════════════════════════════════════════════════
 // STORE
 // ══════════════════════════════════════════════════════════════
 const S = {
   load(){
-    try{const d=JSON.parse(localStorage.getItem('pt5')||'{}');
-      d.ans=d.ans||{};d.ansAt=d.ansAt||{};d.att=d.att||{};d.val=d.val||{};d.bg=d.bg||null;
-      d.timerEnabled=d.timerEnabled!==false;
-      d.who=d.who||{tries:[],found:false};
-      d.who.tries=Array.isArray(d.who.tries)?d.who.tries:[];
-      d.who.found=!!d.who.found;
-      return d}
-    catch{return{ans:{},ansAt:{},att:{},val:{},bg:null,timerEnabled:true,who:{tries:[],found:false}}}
+    try{
+      return normalizeState(JSON.parse(localStorage.getItem('pt5')||'{}'));
+    }catch{
+      return defaultStoreState();
+    }
   },
-  save(d){try{localStorage.setItem('pt5',JSON.stringify(d))}catch{}},
+  save(d){
+    const next=markStateMetadata(normalizeState(d));
+    try{localStorage.setItem('pt5',JSON.stringify(next));}catch{}
+    scheduleRemotePush(next);
+  },
   saveAns(id,v){const d=this.load();d.ans[id]=v;d.ansAt[id]=new Date().toISOString();this.save(d)},
   addAtt(cid,w){const d=this.load();d.att[cid]=d.att[cid]||[];d.att[cid].push({w,date:new Date().toISOString()});this.save(d)},
   valid(cid){const d=this.load();d.val[cid]=true;this.save(d)},
@@ -693,6 +828,7 @@ let role=null, curQ=0;
 // PARTICLES
 // ══════════════════════════════════════════════════════════════
 renderParticles();
+initRemoteSync();
 
 // ══════════════════════════════════════════════════════════════
 // SPOTIFY HELPERS
@@ -1295,11 +1431,12 @@ function adminResetSite(){
   if(role!=='admin') return;
   const ok=window.confirm('Confirmer le reset ? Cela effacera les reponses, tentatives, mots trouves et couleur sauvegardee cote utilisateur.');
   if(!ok) return;
-  try{localStorage.removeItem('pt5')}catch{}
+  const empty=defaultStoreState();
+  S.save(empty);
   curQ=0;
   resetTheme();
   goPage('admin-home');
-  alert('Memoire utilisateur effacee.');
+  alert('Memoire utilisateur effacee sur tous les appareils.');
 }
 
 function adminToggleTimer(enabled){
