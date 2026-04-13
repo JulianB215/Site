@@ -1002,7 +1002,16 @@ function buildNav(){
   };
   nl.appendChild(o);
 }
-function unlockedCount(){const d=S.load();return QS.filter(q=>d.ans[q.id]!==undefined).length}
+function isAnsweredValue(v){
+  return v!==undefined&&v!==null;
+}
+function answeredCount(d){
+  return QS.filter(q=>isAnsweredValue(d.ans[q.id])).length;
+}
+function totalAttemptsCount(d){
+  return CLUES.reduce((n,c)=>n+((Array.isArray(d.att[c.id])?d.att[c.id].length:0)),0);
+}
+function unlockedCount(){const d=S.load();return answeredCount(d)}
 function navActive(id){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
   if(role==='user') document.querySelectorAll('.nav-btn').forEach(b=>{
@@ -1028,7 +1037,7 @@ function goPage(id){
 // ══════════════════════════════════════════════════════════════
 function renderHome(){
   const d=S.load();
-  const ans=Object.keys(d.ans).length;
+  const ans=answeredCount(d);
   const wordVal=CLUES.filter(c=>d.val[c.id]).length;
   const pct=Math.round(ans/QS.length*100);
 
@@ -1473,9 +1482,9 @@ function adminToggleTimer(enabled){
 
 function renderAdminHome(){
   const d=S.load();
-  const ans=Object.keys(d.ans).length;
+  const ans=answeredCount(d);
   const wordVal=CLUES.filter(c=>d.val[c.id]).length;
-  const att=Object.values(d.att).flat().length;
+  const att=totalAttemptsCount(d);
   const timerEnabled=d.timerEnabled!==false;
   document.getElementById('astats').innerHTML=[
     {n:ans,t:QS.length,l:'Questions répondues'},
