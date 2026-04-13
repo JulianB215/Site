@@ -242,7 +242,7 @@ textarea.inp{resize:vertical;font-family:'Cormorant Garamond',serif;font-size:17
         <h2 class="big">Tableau de bord</h2>
       </div>
       <div class="mb24">
-        <button class="btn btn-ghost" onclick="adminResetSite()">Reset le site (effacer la memoire user)</button>
+        <button class="btn btn-ghost" onclick="adminResetSite()">Reset total (tous les comptes)</button>
       </div>
       <div class="stats-grid" id="astats"></div>
       <div class="card" id="aqlist"></div>
@@ -731,6 +731,7 @@ function rerenderActivePage(){
 
 function hasMeaningfulState(d){
   if(!d||typeof d!=='object') return false;
+  if(d.meta&&Number(d.meta.updatedAt)>0) return true;
   if(Object.keys(d.ans||{}).length) return true;
   if(Object.keys(d.ansAt||{}).length) return true;
   if(Object.keys(d.val||{}).length) return true;
@@ -783,7 +784,7 @@ function initRemoteSync(){
         const localNow=S.load();
         const remoteTs=incoming.meta&&incoming.meta.updatedAt?incoming.meta.updatedAt:0;
         const localTs=localNow.meta&&localNow.meta.updatedAt?localNow.meta.updatedAt:0;
-        if(!hasMeaningfulState(incoming)) return;
+        if(!hasMeaningfulState(incoming)&&!(remoteTs>localTs)) return;
         // Ignore stale or equal updates to prevent count drift across devices.
         if(remoteTs&&localTs&&remoteTs<=localTs) return;
 
@@ -1455,14 +1456,14 @@ function renderRules(){
 // ══════════════════════════════════════════════════════════════
 function adminResetSite(){
   if(role!=='admin') return;
-  const ok=window.confirm('Confirmer le reset ? Cela effacera les reponses, tentatives, mots trouves et couleur sauvegardee cote utilisateur.');
+  const ok=window.confirm('Confirmer le reset total ? Cela effacera les reponses, tentatives, mots trouves et couleur pour tous les comptes sur tous les appareils.');
   if(!ok) return;
   const empty=defaultStoreState();
   S.save(empty);
   curQ=0;
   resetTheme();
   goPage('admin-home');
-  alert('Memoire utilisateur effacee sur tous les appareils.');
+  alert('Reset total effectue: toutes les donnees ont ete reinitialisees pour tous les comptes.');
 }
 
 function adminToggleTimer(enabled){
