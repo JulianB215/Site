@@ -230,7 +230,7 @@ textarea.inp{resize:vertical;font-family:'Cormorant Garamond',serif;font-size:17
       <h2 class="big mb40">Les règles du jeu</h2>
       <div id="rcontent"></div>
       <hr class="divider">
-      <p class="serif tr italic" style="font-size:20px;line-height:1.8">« Ce jeu a été fait avec soin,<br>avec patience, et avec beaucoup de sentiments. »</p>
+      <p class="serif tr italic" style="font-size:20px;line-height:1.8">« Ce jeu a été crée par mes soins et <br>le site a été fait par Robin. »</p>
     </div>
   </div>
 
@@ -1626,7 +1626,7 @@ function tryClue(cid){
 function renderRules(){
   document.getElementById('rcontent').innerHTML=[
     ['01','Tu peux demander à n\'importe qui de t\'aider pour trouver les mots cachés des indices'],
-    ['02','Tu n\'as pas le droit de demander aux ICY des indices sur qui je suis'],
+    ['02','Tu n\'as pas le droit de demander à Robin des indices sur qui je suis'],
     ['03','Interdit d\'aller voir quelqu\'un que tu soupconnes'],
   ].map(([n,t,p])=>`<div class="flex g24 mb36"><div class="serif" style="font-size:28px;font-weight:300;color:var(--rose);opacity:.5;min-width:36px;line-height:1">${n}</div><div><h3 class="serif" style="font-size:19px;font-weight:400;color:var(--ink);margin-bottom:8px">${t}</h3>${p?`<p style="font-size:14px;color:var(--muted);line-height:1.85">${p}</p>`:''}</div></div>`).join('');
 }
