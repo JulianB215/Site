@@ -1206,14 +1206,14 @@ function renderHome(){
   const pct=Math.round(ans/QS.length*100);
 
   // Inject Spotify if music question answered
-  const musicAns=d.ans[7]; // question 7 = rappeur
+  const musicAns=d.ans[3]; // question 7 = rappeur
   const zone=document.getElementById('spotify-zone');
   if(musicAns&&musicAns.artist){
     injectSpotify(musicAns.artist);
   } else {
     zone.innerHTML='';
   }
-  injectSeriesOpening(d.ans[2]);
+  injectSeriesOpening(d.ans[6]);
 
   document.getElementById('hstats').innerHTML=[
     {n:ans,t:QS.length,l:'Questions\nrépondues'},
