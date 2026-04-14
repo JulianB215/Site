@@ -357,22 +357,22 @@ const CLUES = [
 const QS = [
   {id:1, text:"Est-ce que tu pourrais te remettre en couple ?",
   type:'text', cid:1},
-  {id:2, text:"Quel est ta série préférée ?",
-  type:'text', cid:2},
-  {id:3, text:"Quel cadeau aimerais-tu recevoir de la part de ton partenaire ?",
+  {id:2, text:"Quel cadeau aimerais-tu recevoir de la part de ton partenaire ?",
   type:'choice',
-   choices:['🌸  Bouquet de fleurs','🍫  Des chocolats'], cid:3},
-  {id:4, text:"Ton plus grand rêve ?",
+   choices:['🌸  Bouquet de fleurs','🍫  Des chocolats'], cid:2},
+  {id:3, text:"Quel est ton rappeur préféré ?",
+  type:'music', cid:3},
+  {id:4, text:"Quelle petite attention aimerais-tu recevoir de la part de ton partenaire ?",
   type:'text', cid:4},
-  {id:5, text:"Quelle petite attention aimerais-tu recevoir de ton partenaire ?",
-  type:'text', cid:5},
-  {id:6, text:"Quelle est ta couleur préférée ?",
-  type:'color', cid:6},
-  {id:7, text:"C'est quoi ton rappeur préféré ?",
-  type:'music', cid:7},
-  {id:8, text:"Quel est ton plat préféré ?",
+  {id:5, text:"Quelle est ta couleur préférée ?",
+  type:'color', cid:5},
+  {id:6, text:"Quel est ta série préférée ?",
+  type:'text', cid:6},
+  {id:7, text:"Quel est ton plat préféré ?",
+  type:'text', cid:7},
+  {id:8, text:"Quel est ton plus grand rêve ?",
   type:'text', cid:8},
-  {id:9, text:"Si tu devais décrire notre relation en un seul mot, lequel choisirais-tu ?",
+  {id:9, text:"Est ce que tu t'es bien amusée à trouver les différents indices et à retrouver qui je suis ?",
   type:'text', cid:9},
 ];
 
@@ -380,7 +380,7 @@ const FINAL = "Merci d'avoir joué le jeu, j'espère que tu t'es bien amusé à 
 const WHO_AM_I_PROMPT = 'Qui suis-je ?';
 const WHO_AM_I_ANSWERS = ['JULIAN BREUILLER','BREUILLER JULIAN','JULIAN','JUL'];
 const WHO_AM_I_MAX_TRIES = 3;
-const QUESTION_DELAY_MS = 60*60*1000;
+const QUESTION_DELAY_MS = 6*60*60*1000;
 
 // IDs verifies manuellement. Le reste passe en embed de recherche.
 const VERIFIED_SPOTIFY_IDS = {
@@ -1673,7 +1673,7 @@ function renderAdminHome(){
       <div class="label-sm" style="margin:0">État des questions</div>
       <label class="flex fc g8" style="font-size:12px;color:var(--muted);cursor:pointer">
         <input id="timer-toggle" type="checkbox" ${timerEnabled?'checked':''} onchange="adminToggleTimer(this.checked)"/>
-        Timer 1h activé
+        Timer 6h activé
       </label>
     </div>`+
     QS.map(q=>{const a=d.ans[q.id]!==undefined;return`<div class="flex fb fc" style="padding:13px 0;border-bottom:1px solid var(--border)"><div class="flex fc g12"><div style="width:6px;height:6px;border-radius:50%;background:${a?'var(--rose)':'var(--border)'};flex-shrink:0"></div><p style="font-size:13px;color:var(--ink)">${q.text}</p></div>${a?'<span class="tag tag-green">Répondue</span>':'<span class="tag tag-gray">En attente</span>'}</div>`}).join('');
