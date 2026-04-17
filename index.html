@@ -298,6 +298,13 @@ const USERS = { anna:{pass:'lpb',role:'user'}, moi:{pass:'juju2020',role:'admin'
 // (URL web ou nom de fichier si dans le même dossier ex: "thomin.jpg")
 const CLUES = [
   {
+    id:0, label:'Prologue', type:'word',
+    text:'Le jeu commence ici',
+    word:'BIENVENUE', n:9,
+    hint:'Ouvert dès le départ',
+    unlocked:true
+  },
+  {
     id:1, label:'Cheer', type:'image',
     // ↓↓ REMPLACE par une photo de cheer ↓↓
     img:"C.png",
@@ -336,7 +343,7 @@ const CLUES = [
   },
   {
     id:7, label:'Thomin', type:'word',
-    text:"τ + principale (en) = ",
+    text:"τ + hand (fr) = ",
     word:"THOMIN", n:6,
     hint:'C\'est un Professeur'
   }, 
@@ -376,6 +383,11 @@ const QS = [
   {id:9, text:"Est ce que tu t'es bien amusée à trouver les différents indices et à retrouver qui je suis ?",
   type:'text', cid:9},
 ];
+
+const Q_BY_CID = QS.reduce((acc, q) => {
+  acc[q.cid] = q;
+  return acc;
+}, {});
 
 const FINAL = "Merci d'avoir joué le jeu, j'espère que tu t'es bien amusé à découvrir tous les indices et que tu as aimé les happenings. \n Je ne savais pas comment t'avouer mes sentiments dans la situation actuelle. Donc j'ai trouvé cette idée original de te l'avouer à travers un jeu. Je me suis grave amusé à faire ce jeu. \n Même si ce n'est pas réciproque, j'ai tenté et je n'ai aucun regret. On pourra en parler si tu le veux bien un de ces quatre. \n\n Julian\n✦";
 const WHO_AM_I_PROMPT = 'Qui suis-je ?';
@@ -715,6 +727,20 @@ function normalizeText(v){
   return (v||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
 }
 
+function getQuestion2FollowUp(choice){
+  const normalized=normalizeText(choice);
+  if(normalized.includes('chocolat')){
+    return {
+      label:'Quel est ta marque de chocolat préférée ?',
+      placeholder:'Ex: Kinder, Lindt, Milka…',
+    };
+  }
+  return {
+    label:'Quelle est ta fleur préférée ?',
+    placeholder:'Ex: rose, tulipe, pivoine…',
+  };
+}
+
 function findSeriesTheme(seriesName){
   const s=normalizeText(seriesName);
   if(!s) return null;
@@ -771,6 +797,9 @@ function summarizeAnswer(v){
   if(v===undefined||v===null) return '';
   if(typeof v==='string') return v;
   if(typeof v==='object'){
+    if(typeof v.choice==='string'&&typeof v.followUpAnswer==='string'){
+      return `${v.choice} | ${v.followUpLabel||'Sous-question'}: ${v.followUpAnswer}`;
+    }
     if(typeof v.artist==='string') return v.artist;
     if(typeof v.name==='string'&&typeof v.hex==='string') return `${v.name} (${v.hex})`;
     try{return JSON.stringify(v);}catch{return String(v);}
@@ -1176,7 +1205,15 @@ function answeredCount(d){
 function totalAttemptsCount(d){
   return CLUES.reduce((n,c)=>n+((Array.isArray(d.att[c.id])?d.att[c.id].length:0)),0);
 }
-function unlockedCount(){const d=S.load();return answeredCount(d)}
+function isClueUnlocked(clue,d){
+  if(clue.unlocked===true) return true;
+  const q=Q_BY_CID[clue.id];
+  return !!(q&&d.ans[q.id]!==undefined);
+}
+function unlockedCount(){
+  const d=S.load();
+  return CLUES.filter(clue=>isClueUnlocked(clue,d)).length;
+}
 function navActive(id){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
   if(role==='user') document.querySelectorAll('.nav-btn').forEach(b=>{
@@ -1218,7 +1255,7 @@ function renderHome(){
 
   document.getElementById('hstats').innerHTML=[
     {n:ans,t:QS.length,l:'Questions\nrépondues'},
-    {n:unlockedCount(),t:QS.length,l:'Indices\ndébloqués'},
+    {n:unlockedCount(),t:CLUES.length,l:'Indices\ndébloqués'},
     {n:wordVal,t:CLUES.length,l:'Mots\ntrouvés'},
   ].map(s=>`<div class="stat-card"><div class="stat-n">${s.n}<sub>/${s.t}</sub></div><div class="stat-label" style="white-space:pre-line">${s.l}</div></div>`).join('');
 
@@ -1265,7 +1302,13 @@ function renderQuestions(){
       prev=`<p style="font-size:15px;font-weight:500;color:var(--ink);margin-bottom:6px">${saved.artist}</p>
         <p style="font-size:12px;color:var(--muted)">Sa musique joue sur l'accueil ✦</p>`;
     }
-    else if(q.type==='choice') prev=`<p style="font-size:15px;color:var(--ink)">${saved}</p>`;
+    else if(q.type==='choice'){
+      if(saved&&typeof saved==='object'){
+        const followLabel=saved.followUpLabel||(saved.choice&&normalizeText(saved.choice).includes('chocolat')?'Quel est ta marque de chocolat préférée ?':'Quelle est ta fleur préférée ?');
+        prev=`<p style="font-size:15px;color:var(--ink);margin-bottom:8px">${saved.choice||''}</p>
+          <p style="font-size:13px;color:var(--muted);line-height:1.7"><span style="color:var(--rose)">${followLabel}</span><br>${saved.followUpAnswer||''}</p>`;
+      } else prev=`<p style="font-size:15px;color:var(--ink)">${saved}</p>`;
+    }
     else if(q.type==='color'){
       const colorHex=(saved&&typeof saved==='object'&&saved.hex)?saved.hex:(typeof saved==='string'?saved:'#fce8ee');
       const colorName=(saved&&typeof saved==='object'&&saved.name)?saved.name:'Couleur choisie';
@@ -1318,16 +1361,60 @@ function buildForm(el,q){
 
   else if(q.type==='choice'){
     const grid=document.createElement('div');grid.className='choice-grid';
+    const followUpWrap=document.createElement('div');
+    followUpWrap.style.display='none';
     let chosen=null;
+    let followUpInput=null;
+    const btn=document.createElement('button');btn.className='btn btn-primary';btn.style.marginTop='4px';btn.textContent='Valider →';btn.disabled=true;
+
+    function refreshSubmitState(){
+      const hasFollowUp=q.id===2?!!(followUpInput&&followUpInput.value.trim()):true;
+      btn.disabled=!chosen||!hasFollowUp;
+    }
+
+    function renderFollowUp(){
+      if(q.id!==2||!chosen){
+        followUpWrap.style.display='none';
+        followUpWrap.innerHTML='';
+        followUpInput=null;
+        refreshSubmitState();
+        return;
+      }
+
+      const meta=getQuestion2FollowUp(chosen);
+      followUpWrap.style.display='block';
+      followUpWrap.innerHTML=`
+        <div class="card-rose" style="padding:18px 20px;margin-bottom:4px">
+          <div class="label-sm" style="margin-bottom:8px;color:var(--rose)">Sous-question</div>
+          <p style="font-size:14px;color:var(--ink);line-height:1.7;margin-bottom:12px">${meta.label}</p>
+          <input class="inp" id="q2-followup" placeholder="${meta.placeholder}" autocomplete="off" />
+        </div>`;
+      followUpInput=followUpWrap.querySelector('#q2-followup');
+      followUpInput.addEventListener('input',refreshSubmitState);
+      refreshSubmitState();
+    }
+
     q.choices.forEach(c=>{
       const cb=document.createElement('button');cb.className='choice-btn';
       cb.innerHTML=`<div class="choice-radio"></div><span>${c}</span>`;
-      cb.onclick=()=>{grid.querySelectorAll('.choice-btn').forEach(b=>b.classList.remove('selected'));cb.classList.add('selected');chosen=c;btn.disabled=false};
+      cb.onclick=()=>{grid.querySelectorAll('.choice-btn').forEach(b=>b.classList.remove('selected'));cb.classList.add('selected');chosen=c;renderFollowUp();refreshSubmitState()};
       grid.appendChild(cb);
     });
-    const btn=document.createElement('button');btn.className='btn btn-primary';btn.style.marginTop='4px';btn.textContent='Valider →';btn.disabled=true;
-    btn.onclick=()=>{if(!chosen)return;S.saveAns(q.id,chosen);showUnlock(w,q)};
-    w.appendChild(grid);w.appendChild(btn);
+    btn.onclick=()=>{
+      if(!chosen)return;
+      if(q.id===2){
+        const followUpAnswer=followUpInput?followUpInput.value.trim():'';
+        if(!followUpAnswer)return;
+        const followUpLabel=getQuestion2FollowUp(chosen).label;
+        S.saveAns(q.id,{choice:chosen,followUpLabel,followUpAnswer});
+      } else {
+        S.saveAns(q.id,chosen);
+      }
+      showUnlock(w,q);
+    };
+    w.appendChild(grid);
+    w.appendChild(followUpWrap);
+    w.appendChild(btn);
   }
 
   else if(q.type==='music'){
@@ -1450,7 +1537,7 @@ function renderIndices(){
 
   CLUES.forEach((clue,i)=>{
     const q=qByCid[clue.id];
-    const unlocked=q&&d.ans[q.id]!==undefined;
+    const unlocked=isClueUnlocked(clue,d);
     const isVal=!!d.val[clue.id];
     const tries=d.att[clue.id]||[];
     const hintText=(clue.hint||'').trim();
@@ -1540,8 +1627,7 @@ function renderIndices(){
   });
 
   const allUnlocked=CLUES.every(clue=>{
-    const q=qByCid[clue.id];
-    return q&&d.ans[q.id]!==undefined;
+    return isClueUnlocked(clue,d);
   });
   if(allUnlocked){
     const who=(d.who&&typeof d.who==='object')?d.who:{tries:[],found:false};
@@ -1698,7 +1784,17 @@ function renderAdminAnswers(){
           ${embed}
         </div>`;
       }
-      else if(q.type==='choice') prev=`<div class="answer-bar"><p style="font-size:15px;color:var(--ink)">${a}</p></div>`;
+        else if(q.type==='choice'){
+          if(a&&typeof a==='object'){
+            const followLabel=a.followUpLabel||(a.choice&&normalizeText(a.choice).includes('chocolat')?'Quel est ta marque de chocolat préférée ?':'Quelle est ta fleur préférée ?');
+            prev=`<div class="answer-bar">
+              <p style="font-size:15px;color:var(--ink);margin-bottom:8px">${a.choice||''}</p>
+              <p style="font-size:13px;color:var(--muted);line-height:1.7"><span style="color:var(--rose-deep)">${followLabel}</span><br>${a.followUpAnswer||''}</p>
+            </div>`;
+          } else {
+            prev=`<div class="answer-bar"><p style="font-size:15px;color:var(--ink)">${a}</p></div>`;
+          }
+        }
       else if(q.type==='color'){
         const colorHex=(a&&typeof a==='object'&&a.hex)?a.hex:(typeof a==='string'?a:'#fce8ee');
         const colorName=(a&&typeof a==='object'&&a.name)?a.name:'Couleur choisie';
@@ -1717,7 +1813,7 @@ function renderAdminClues(){
   const d=S.load();
   const qByCid={};QS.forEach(q=>qByCid[q.cid]=q);
   document.getElementById('aclues').innerHTML=CLUES.map(clue=>{
-    const q=qByCid[clue.id];const unlocked=q&&d.ans[q.id]!==undefined;
+    const q=qByCid[clue.id];const unlocked=isClueUnlocked(clue,d);
     const isVal=!!d.val[clue.id];const tries=d.att[clue.id]||[];
     const hintText=(clue.hint||'').trim();
     const canShowHint=hintText.length>0;
