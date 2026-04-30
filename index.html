@@ -1202,15 +1202,17 @@ function totalAttemptsCount(d){
 }
 function isClueUnlocked(clue,d){
   if(clue.unlocked===true) return true;
-  // Comportement spécial :
-  // - L'indice 1 se débloque quand la question 4 est répondue (Q4 → I1)
-  // - Les indices 2 et 3 restent verrouillés automatiquement
-  if(typeof clue.id==='number'){
-    if(clue.id===1) return !!(d.ans&&d.ans[4]!==undefined);
-    if(clue.id===2||clue.id===3) return false;
+  // Nouveau comportement : les questions 3..11 débloquent l'indice situé 2 positions
+  // en-dessous (question.cid -> clue id = cid - 2). Exemple : question with cid 3
+  // débloque l'indice 1. On regarde d'abord cette règle, sinon on retombe sur
+  // le comportement par défaut (question dont cid === clue.id).
+  const localD = d || S.load();
+  const shiftedQ = Q_BY_CID[clue.id + 2];
+  if(shiftedQ && typeof shiftedQ.id === 'number' && shiftedQ.id >= 3 && shiftedQ.id <= 11){
+    return !!(localD.ans && localD.ans[shiftedQ.id] !== undefined);
   }
-  const q=Q_BY_CID[clue.id];
-  return !!(q&&d.ans[q.id]!==undefined);
+  const q = Q_BY_CID[clue.id];
+  return !!(q && localD.ans && localD.ans[q.id] !== undefined);
 }
 function unlockedCount(){
   const d=S.load();
