@@ -1202,9 +1202,13 @@ function totalAttemptsCount(d){
 }
 function isClueUnlocked(clue,d){
   if(clue.unlocked===true) return true;
-  // Ne pas débloquer automatiquement les indices liés aux 3 premières questions
-  // (clue.id 1..3) quand on répond : ces indices restent verrouillés.
-  if(typeof clue.id==='number' && clue.id>=1 && clue.id<=3) return false;
+  // Comportement spécial :
+  // - L'indice 1 se débloque quand la question 4 est répondue (Q4 → I1)
+  // - Les indices 2 et 3 restent verrouillés automatiquement
+  if(typeof clue.id==='number'){
+    if(clue.id===1) return !!(d.ans&&d.ans[4]!==undefined);
+    if(clue.id===2||clue.id===3) return false;
+  }
   const q=Q_BY_CID[clue.id];
   return !!(q&&d.ans[q.id]!==undefined);
 }
@@ -1362,13 +1366,8 @@ function buildForm(el,q){
     btnNon.textContent='Non';
     btnNon.style.cssText='position:absolute;left:75%;top:50%;transform:translate(-50%,-50%);transition:left .35s ease,top .35s ease,transform .2s;z-index:5';
 
-    const info=document.createElement('div');
-    info.style.cssText='position:absolute;inset:auto 12px 12px 12px;color:var(--muted);font-size:13px;pointer-events:none';
-    info.textContent='Clique sur un bouton — il s\'échappera 3 fois avant de valider.';
-
     container.appendChild(btnOui);
     container.appendChild(btnNon);
-    container.appendChild(info);
     w.appendChild(container);
     el.appendChild(w);
 
