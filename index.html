@@ -692,16 +692,16 @@ function normalizeText(v){
   return (v||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
 }
 
-function getQuestion2FollowUp(choice){
+function getQuestion4FollowUp(choice){
   const normalized=normalizeText(choice);
   if(normalized.includes('chocolat')){
     return {
-      label:'Quel est ta marque de chocolat préférée ?',
+      label:'Quelle est sa marque de chocolat favorite ?',
       placeholder:'Ex: Kinder, Lindt, Milka…',
     };
   }
   return {
-    label:'Quelle est ta fleur préférée ?',
+    label:'Quelle est sa fleur préférée ?',
     placeholder:'Ex: rose, tulipe, pivoine…',
   };
 }
@@ -1313,7 +1313,7 @@ function renderQuestions(){
     }
     else if(q.type==='choice'){
       if(saved&&typeof saved==='object'){
-        const followLabel=saved.followUpLabel||(saved.choice&&normalizeText(saved.choice).includes('chocolat')?'Quel est ta marque de chocolat préférée ?':'Quelle est ta fleur préférée ?');
+        const followLabel=saved.followUpLabel||(saved.choice&&normalizeText(saved.choice).includes('chocolat')?'Quelle est sa marque de chocolat favorite ?':'Quelle est sa fleur préférée ?');
         prev=`<p style="font-size:15px;color:var(--ink);margin-bottom:8px">${saved.choice||''}</p>
           <p style="font-size:13px;color:var(--muted);line-height:1.7"><span style="color:var(--rose)">${followLabel}</span><br>${saved.followUpAnswer||''}</p>`;
       } else prev=`<p style="font-size:15px;color:var(--ink)">${saved}</p>`;
@@ -1456,12 +1456,12 @@ function buildForm(el,q){
     const btn=document.createElement('button');btn.className='btn btn-primary';btn.style.marginTop='4px';btn.textContent='Valider →';btn.disabled=true;
 
     function refreshSubmitState(){
-      const hasFollowUp=q.id===2?!!(followUpInput&&followUpInput.value.trim()):true;
+      const hasFollowUp=q.id===4?!!(followUpInput&&followUpInput.value.trim()):true;
       btn.disabled=!chosen||!hasFollowUp;
     }
 
     function renderFollowUp(){
-      if(q.id!==2||!chosen){
+      if(q.id!==4||!chosen){
         followUpWrap.style.display='none';
         followUpWrap.innerHTML='';
         followUpInput=null;
@@ -1469,7 +1469,7 @@ function buildForm(el,q){
         return;
       }
 
-      const meta=getQuestion2FollowUp(chosen);
+      const meta=getQuestion4FollowUp(chosen);
       followUpWrap.style.display='block';
       followUpWrap.innerHTML=`
         <div class="card-rose" style="padding:18px 20px;margin-bottom:4px">
@@ -1490,10 +1490,10 @@ function buildForm(el,q){
     });
     btn.onclick=()=>{
       if(!chosen)return;
-      if(q.id===2){
+      if(q.id===4){
         const followUpAnswer=followUpInput?followUpInput.value.trim():'';
         if(!followUpAnswer)return;
-        const followUpLabel=getQuestion2FollowUp(chosen).label;
+        const followUpLabel=getQuestion4FollowUp(chosen).label;
         S.saveAns(q.id,{choice:chosen,followUpLabel,followUpAnswer});
       } else {
         S.saveAns(q.id,chosen);
@@ -1890,7 +1890,7 @@ function renderAdminAnswers(){
       }
         else if(q.type==='choice'){
           if(a&&typeof a==='object'){
-            const followLabel=a.followUpLabel||(a.choice&&normalizeText(a.choice).includes('chocolat')?'Quel est ta marque de chocolat préférée ?':'Quelle est ta fleur préférée ?');
+            const followLabel=a.followUpLabel||(a.choice&&normalizeText(a.choice).includes('chocolat')?'Quelle est sa marque de chocolat favorite ?':'Quelle est sa fleur préférée ?');
             prev=`<div class="answer-bar">
               <p style="font-size:15px;color:var(--ink);margin-bottom:8px">${a.choice||''}</p>
               <p style="font-size:13px;color:var(--muted);line-height:1.7"><span style="color:var(--rose-deep)">${followLabel}</span><br>${a.followUpAnswer||''}</p>
