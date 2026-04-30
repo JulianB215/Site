@@ -1021,7 +1021,9 @@ function formatRemaining(ms){
 
 function getQuestionUnlockInfo(index,d){
   if(!d.timerEnabled) return {unlocked:true,remaining:0,waitingPrevious:false};
-  if(index===0) return {unlocked:true,remaining:0,waitingPrevious:false};
+  // Les 4 premières questions (1..4) restent toujours accessibles,
+  // même si le timer est activé.
+  if(index<=3) return {unlocked:true,remaining:0,waitingPrevious:false};
   const prev=QS[index-1];
   if(d.ans[prev.id]===undefined) return {unlocked:false,remaining:QUESTION_DELAY_MS,waitingPrevious:true};
   const at=d.ansAt&&d.ansAt[prev.id]?new Date(d.ansAt[prev.id]).getTime():null;
