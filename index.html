@@ -696,12 +696,12 @@ function getQuestion4FollowUp(choice){
   const normalized=normalizeText(choice);
   if(normalized.includes('chocolat')){
     return {
-      label:'Quelle est sa marque de chocolat favorite ?',
+      label:'Quelle est ta marque de chocolat favorite ?',
       placeholder:'Ex: Kinder, Lindt, Milka…',
     };
   }
   return {
-    label:'Quelle est sa fleur préférée ?',
+    label:'Quelle est ta fleur préférée ?',
     placeholder:'Ex: rose, tulipe, pivoine…',
   };
 }
@@ -1313,7 +1313,7 @@ function renderQuestions(){
     }
     else if(q.type==='choice'){
       if(saved&&typeof saved==='object'){
-        const followLabel=saved.followUpLabel||(saved.choice&&normalizeText(saved.choice).includes('chocolat')?'Quelle est sa marque de chocolat favorite ?':'Quelle est sa fleur préférée ?');
+        const followLabel=saved.followUpLabel||(saved.choice&&normalizeText(saved.choice).includes('chocolat')?'Quelle est ta marque de chocolat favorite ?':'Quelle est ta fleur préférée ?');
         prev=`<p style="font-size:15px;color:var(--ink);margin-bottom:8px">${saved.choice||''}</p>
           <p style="font-size:13px;color:var(--muted);line-height:1.7"><span style="color:var(--rose)">${followLabel}</span><br>${saved.followUpAnswer||''}</p>`;
       } else prev=`<p style="font-size:15px;color:var(--ink)">${saved}</p>`;
@@ -1890,7 +1890,7 @@ function renderAdminAnswers(){
       }
         else if(q.type==='choice'){
           if(a&&typeof a==='object'){
-            const followLabel=a.followUpLabel||(a.choice&&normalizeText(a.choice).includes('chocolat')?'Quelle est sa marque de chocolat favorite ?':'Quelle est sa fleur préférée ?');
+            const followLabel=a.followUpLabel||(a.choice&&normalizeText(a.choice).includes('chocolat')?'Quelle est ta marque de chocolat favorite ?':'Quelle est ta fleur préférée ?');
             prev=`<div class="answer-bar">
               <p style="font-size:15px;color:var(--ink);margin-bottom:8px">${a.choice||''}</p>
               <p style="font-size:13px;color:var(--muted);line-height:1.7"><span style="color:var(--rose-deep)">${followLabel}</span><br>${a.followUpAnswer||''}</p>
