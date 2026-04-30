@@ -1231,6 +1231,11 @@ function navActive(id){
 // ROUTER
 // ══════════════════════════════════════════════════════════════
 function goPage(id){
+  if(id==='questions'){
+    const d=S.load();
+    const nextUnansweredIdx=QS.findIndex(q=>d.ans[q.id]===undefined);
+    curQ=nextUnansweredIdx===-1?Math.max(0,QS.length-1):nextUnansweredIdx;
+  }
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   const pg=document.getElementById(`page-${id}`);if(pg)pg.classList.add('active');
   navActive(id);window.scrollTo(0,0);
