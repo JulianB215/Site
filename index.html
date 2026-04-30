@@ -379,25 +379,29 @@ const CLUES = [
 ];
 
 const QS = [
-  {id:1, text:"Est-ce que tu pourrais te remettre en couple ?",
-  type:'text', cid:1},
-  {id:2, text:"Quel cadeau aimerais-tu recevoir de la part de ton partenaire ?",
+  {id:1, text:"Anna c'est toi ?",
+  type:'choice', choices:['Oui','Non'], cid:1},
+  {id:2, text:"Est-ce que tu es prête à te divertir ?",
+  type:'text', cid:2},
+  {id:3, text:"C'est parti ?",
+  type:'text', cid:3},
+  {id:4, text:"Quel cadeau aimerais-tu recevoir ?",
   type:'choice',
-   choices:['🌸  Bouquet de fleurs','🍫  Des chocolats'], cid:2},
-  {id:3, text:"Quel est ton rappeur ou ta rappeuse préféré(e) ?",
-  type:'music', cid:3},
-  {id:4, text:"Quelle petite attention aimerais-tu recevoir de la part de ton partenaire ?",
-  type:'text', cid:4},
-  {id:5, text:"Quelle est ta couleur préférée ?",
-  type:'color', cid:5},
-  {id:6, text:"Quel est ta série préférée ?",
+   choices:['🌸  Bouquet de fleurs','🍫  Des chocolats'], cid:4},
+  {id:5, text:"Quel est ton rappeur ou ta rappeuse préféré(e) ?",
+  type:'music', cid:5},
+  {id:6, text:"Quel est ton truc débile qui te fait kiffer de fou ?",
   type:'text', cid:6},
-  {id:7, text:"Quel est ton plat préféré ?",
-  type:'text', cid:7},
-  {id:8, text:"Quel est ton plus grand rêve ?",
+  {id:7, text:"Quelle est ta couleur préférée ?",
+  type:'color', cid:7},
+  {id:8, text:"Quel est ta série préférée ?",
   type:'text', cid:8},
-  {id:9, text:"Est ce que tu t'es bien amusée à trouver les différents indices et à retrouver qui je suis ?",
+  {id:9, text:"Quel est ton plat préféré ?",
   type:'text', cid:9},
+  {id:10, text:"Quel est ton plus grand rêve ?",
+  type:'text', cid:10},
+  {id:11, text:"Est ce que tu t'es bien amusée à trouver les différents indices et à retrouver qui je suis ?",
+  type:'text', cid:11},
 ];
 
 const Q_BY_CID = QS.reduce((acc, q) => {
@@ -409,7 +413,7 @@ const FINAL = "Merci d'avoir joué le jeu, j'espère que tu t'es bien amusé à 
 const WHO_AM_I_PROMPT = 'Qui suis-je ?';
 const WHO_AM_I_ANSWERS = ['JULIAN BREUILLER','BREUILLER JULIAN','JULIAN','JUL'];
 const WHO_AM_I_MAX_TRIES = 3;
-const QUESTION_DELAY_MS = 6*60*60*1000;
+const QUESTION_DELAY_MS = 3*60*60*1000;
 
 // IDs verifies manuellement. Le reste passe en embed de recherche.
 const VERIFIED_SPOTIFY_IDS = {
@@ -487,7 +491,7 @@ const SERIES_OPENINGS = [
   {keywords:['brooklyn nine nine','b99','jake peralta'],label:'Brooklyn Nine-Nine',youtubeId:'1ueeQxZTK5s'},
   {keywords:['the walking dead','walking dead','rick grimes'],label:'The Walking Dead',youtubeId:'cyIhK6IqdZQ'},
   {keywords:['house of the dragon','hotd'],label:'House of the Dragon',youtubeId:'aoPsQgJgkgo'},
-  {keywords:['la casa de papel','lcp','lcdp'],label:'La Casa de Papel',youtubeId:'7sMvyZfuGws'},
+  {keywords:['la casa de papel','casa de papel','cdp','lcdp'],label:'La Casa de Papel',youtubeId:'7sMvyZfuGws'},
   {keywords:['the witcher','witcher'],label:'The Witcher',youtubeId:'2U7jZNX80Hk'},
   {keywords:['squid game','squid'],label:'Squid Game',youtubeId:'OgDraEI7i8Y'},
   {keywords:['grey\'s anatomy','greys anatomy'],label:'Grey\'s Anatomy',youtubeId:'EGbg7-LBWak'},
@@ -1198,6 +1202,9 @@ function totalAttemptsCount(d){
 }
 function isClueUnlocked(clue,d){
   if(clue.unlocked===true) return true;
+  // Ne pas débloquer automatiquement les indices liés aux 3 premières questions
+  // (clue.id 1..3) quand on répond : ces indices restent verrouillés.
+  if(typeof clue.id==='number' && clue.id>=1 && clue.id<=3) return false;
   const q=Q_BY_CID[clue.id];
   return !!(q&&d.ans[q.id]!==undefined);
 }
@@ -1339,6 +1346,90 @@ function renderQuestions(){
 
 function buildForm(el,q){
   const w=document.createElement('div');
+
+  // Spécial: question 3 — deux boutons ludiques "Oui" / "Non"
+  if(q.id===3){
+    const container=document.createElement('div');
+    container.style.cssText='position:relative;height:180px;overflow:hidden;margin-bottom:12px;border-radius:6px';
+
+    const btnOui=document.createElement('button');
+    btnOui.className='btn btn-primary';
+    btnOui.textContent='Oui';
+    btnOui.style.cssText='position:absolute;left:25%;top:50%;transform:translate(-50%,-50%);transition:left .35s ease,top .35s ease,transform .2s;z-index:5';
+
+    const btnNon=document.createElement('button');
+    btnNon.className='btn btn-ghost';
+    btnNon.textContent='Non';
+    btnNon.style.cssText='position:absolute;left:75%;top:50%;transform:translate(-50%,-50%);transition:left .35s ease,top .35s ease,transform .2s;z-index:5';
+
+    const info=document.createElement('div');
+    info.style.cssText='position:absolute;inset:auto 12px 12px 12px;color:var(--muted);font-size:13px;pointer-events:none';
+    info.textContent='Clique sur un bouton — il s\'échappera 3 fois avant de valider.';
+
+    container.appendChild(btnOui);
+    container.appendChild(btnNon);
+    container.appendChild(info);
+    w.appendChild(container);
+    el.appendChild(w);
+
+    // Comptages locaux par bouton
+    const counts={Oui:0,Non:0};
+
+    function moveButtonRandom(btn,other){
+      const rect=container.getBoundingClientRect();
+      const bw=btn.offsetWidth;const bh=btn.offsetHeight;
+      const ow=other.offsetWidth;const oh=other.offsetHeight;
+      const padding=12;
+      const maxX=Math.max(0,rect.width-bw-padding);
+      const maxY=Math.max(0,rect.height-bh-padding);
+      let attempts=0;let nx,ny;const minDist= Math.max(bw,24);
+      do{
+        nx=Math.floor(padding + Math.random()*maxX);
+        ny=Math.floor(padding + Math.random()*maxY);
+        attempts++;
+        const otherLeft=parseFloat(other.style.left)||other.offsetLeft;
+        const otherTop=parseFloat(other.style.top)||other.offsetTop;
+        const dx=(nx - otherLeft);const dy=(ny - otherTop);
+        if(isNaN(otherLeft)||isNaN(otherTop)) break;
+        if(Math.sqrt(dx*dx+dy*dy)>minDist) break;
+      } while(attempts<20);
+
+      btn.style.left=nx+'px';
+      btn.style.top=ny+'px';
+    }
+
+    function onBtnClick(kind,btn,other){
+      counts[kind] = (counts[kind]||0) + 1;
+      if(counts[kind] <= 3){
+        moveButtonRandom(btn,other);
+      }
+      if(counts[kind]===3){
+        // Après 3 clics, on enregistre la réponse et on affiche le déblocage
+        S.saveAns(q.id, kind);
+        // Désactiver les deux boutons pour éviter clics supplémentaires
+        btn.style.pointerEvents='none'; other.style.pointerEvents='none';
+        // Montrer retour
+        const okTag=document.createElement('div');okTag.style.cssText='position:absolute;left:12px;top:12px;z-index:6';okTag.innerHTML=`<span class="tag tag-green">Répondu: ${kind}</span>`;
+        container.appendChild(okTag);
+        setTimeout(()=>showUnlock(w,q),300);
+      }
+    }
+
+    // Après insertion dans le DOM, positionner en pixels pour le calcul
+    setTimeout(()=>{
+      // Fix initial pixel positions
+      const cRect=container.getBoundingClientRect();
+      btnOui.style.left = Math.floor(cRect.width*0.25) + 'px';
+      btnOui.style.top = Math.floor(cRect.height*0.5) + 'px';
+      btnNon.style.left = Math.floor(cRect.width*0.75) + 'px';
+      btnNon.style.top = Math.floor(cRect.height*0.5) + 'px';
+    },30);
+
+    btnOui.addEventListener('click',()=>onBtnClick('Oui',btnOui,btnNon));
+    btnNon.addEventListener('click',()=>onBtnClick('Non',btnNon,btnOui));
+
+    return;
+  }
 
   if(q.type==='text'){
     const ta=document.createElement('textarea');ta.className='inp mb16';ta.rows=5;ta.placeholder='Écris librement…';
@@ -1765,7 +1856,7 @@ function renderAdminHome(){
       <div class="label-sm" style="margin:0">État des questions</div>
       <label class="flex fc g8" style="font-size:12px;color:var(--muted);cursor:pointer">
         <input id="timer-toggle" type="checkbox" ${timerEnabled?'checked':''} onchange="adminToggleTimer(this.checked)"/>
-        Timer 6h activé
+        Timer 3h activé
       </label>
     </div>`+
     QS.map(q=>{const a=d.ans[q.id]!==undefined;return`<div class="flex fb fc" style="padding:13px 0;border-bottom:1px solid var(--border)"><div class="flex fc g12"><div style="width:6px;height:6px;border-radius:50%;background:${a?'var(--rose)':'var(--border)'};flex-shrink:0"></div><p style="font-size:13px;color:var(--ink)">${q.text}</p></div>${a?'<span class="tag tag-green">Répondue</span>':'<span class="tag tag-gray">En attente</span>'}</div>`}).join('');
