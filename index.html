@@ -1617,7 +1617,7 @@ function renderIndices(){
 
   // Mini Spotify player dans la page indices
   const zone2=document.getElementById('spotify-indices');
-  const musicAns=d.ans[7];
+  const musicAns=d.ans[5];
   if(musicAns&&musicAns.artist){
     const embed=buildSpotifyEmbed(musicAns.artist,true);
     if(embed) zone2.innerHTML=embed;
